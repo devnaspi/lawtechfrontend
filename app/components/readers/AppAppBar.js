@@ -26,11 +26,11 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
     padding: '8px 12px',
     }));
 
-    export default function AppAppBar() {
+    export default function AppAppBar({ onSignInClick }) {
     const [open, setOpen] = React.useState(false);
 
     const toggleDrawer = (newOpen) => () => {
-    setOpen(newOpen);
+        setOpen(newOpen);
     };
 
     return (
@@ -60,7 +60,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
                 alignItems: 'center',
             }}
             >
-            <Button color="primary" variant="text" size="small">
+            <Button color="primary" variant="text" size="small" onClick={onSignInClick}>
                 Sign in
             </Button>
             <Button color="primary" variant="contained" size="small">
@@ -68,41 +68,6 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
             </Button>
             </Box>
             <Box sx={{ display: { sm: 'flex', md: 'none' } }}>
-            <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
-                <MenuIcon />
-            </IconButton>
-            <Drawer anchor="top" open={open} onClose={toggleDrawer(false)}>
-                <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
-                <Box
-                    sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    }}
-                >
-                    <IconButton onClick={toggleDrawer(false)}>
-                    <CloseRoundedIcon />
-                    </IconButton>
-                </Box>
-                <Divider sx={{ my: 3 }} />
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Testimonials</MenuItem>
-                <MenuItem>Highlights</MenuItem>
-                <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
-                <MenuItem>
-                    <Button color="primary" variant="contained" fullWidth>
-                    Sign up
-                    </Button>
-                </MenuItem>
-                <MenuItem>
-                    <Button color="primary" variant="outlined" fullWidth>
-                    Sign in
-                    </Button>
-                </MenuItem>
-                </Box>
-            </Drawer>
             </Box>
         </StyledToolbar>
         </Container>

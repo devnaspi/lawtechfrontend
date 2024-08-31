@@ -83,7 +83,7 @@ const cardData = [
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <Grid container spacing={2} columns={12}>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid size={{ xs: 6, md: 4 }}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(0)}
@@ -115,7 +115,71 @@ const cardData = [
                         <Author authors={cardData[0].authors} created_at={cardData[0].created_at} />
                         </SyledCard>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid size={{ xs: 6, md: 4 }}>
+                        <SyledCard
+                        variant="outlined"
+                        onFocus={() => handleFocus(1)}
+                        onBlur={handleBlur}
+                        tabIndex={0}
+                        className={focusedCardIndex === 1 ? 'Mui-focused' : ''}
+                        >
+                        <CardMedia
+                            component="img"
+                            alt="green iguana"
+                            image={cardData[1].cover}
+                            aspect-ratio="16 / 9"
+                            sx={{
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            }}
+                        />
+                        <SyledCardContent>
+                            <Typography gutterBottom variant="caption" component="div">
+                            {cardData[1].area}
+                            </Typography>
+                            <Typography gutterBottom variant="h6" component="div">
+                            {cardData[1].title}
+                            </Typography>
+                            <StyledTypography variant="body2" color="text.secondary" gutterBottom>
+                            {cardData[1].description}
+                            </StyledTypography>
+                        </SyledCardContent>
+                        <Author authors={cardData[1].authors} created_at={cardData[1].created_at} />
+                        </SyledCard>
+                    </Grid>
+                    <Grid size={{ xs: 6, md: 4 }}>
+                        <SyledCard
+                        variant="outlined"
+                        onFocus={() => handleFocus(1)}
+                        onBlur={handleBlur}
+                        tabIndex={0}
+                        className={focusedCardIndex === 1 ? 'Mui-focused' : ''}
+                        >
+                        <CardMedia
+                            component="img"
+                            alt="green iguana"
+                            image={cardData[1].cover}
+                            aspect-ratio="16 / 9"
+                            sx={{
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            }}
+                        />
+                        <SyledCardContent>
+                            <Typography gutterBottom variant="caption" component="div">
+                            {cardData[1].area}
+                            </Typography>
+                            <Typography gutterBottom variant="h6" component="div">
+                            {cardData[1].title}
+                            </Typography>
+                            <StyledTypography variant="body2" color="text.secondary" gutterBottom>
+                            {cardData[1].description}
+                            </StyledTypography>
+                        </SyledCardContent>
+                        <Author authors={cardData[1].authors} created_at={cardData[1].created_at} />
+                        </SyledCard>
+                    </Grid>
+                    <Grid size={{ xs: 6, md: 4 }}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(1)}
