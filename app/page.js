@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppAppBar from './components/readers/AppAppBar';
 import NavBar from './components/readers/NavBar';
@@ -10,23 +10,52 @@ import MainContent from './components/readers/MainContent';
 import Footer from './components/readers/Footer'
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
+import Signin from './components/readers/Signin';
+import Signup from './components/readers/Signup';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const [openSignInModal, setOpenSignInModal] = useState(true);
+  const [openSignInModal, setOpenSignInModal] = useState(false);
+  const [openSignUpModal, setOpenSignUpModal] = useState(false);
+  const router = useRouter()
+
+  useEffect(() => {
+    if (window.location.pathname === '/login') {
+      setOpenSignInModal(true);
+    } else if (window.location.pathname === '/sign-up') {
+      setOpenSignUpModal(true);
+    } else if (window.location.pathname === '/'){
+      // do nothing
+    } else {
+      router.push('/404');
+    }
+  }, []);
 
   const handleOpenSignInModal = () => {
     setOpenSignInModal(true);
+    setOpenSignUpModal(false);
   };
 
   const handleCloseSignInModal = () => {
     setOpenSignInModal(false);
+    router.push('/')
+  };
+
+  const handleOpenSignUpModal = () => {
+    setOpenSignUpModal(true);
+    setOpenSignInModal(false);
+  };
+
+  const handleCloseSignUpModal = () => {
+    setOpenSignUpModal(false);
+    router.push('/')
   };
 
   return (
     <Box>
         <CssBaseline />
         <NavBar />
-        <AppAppBar onSignInClick={handleOpenSignInModal} />
+        <AppAppBar />
         <Container
           maxWidth="lg"
           component="main"
@@ -37,79 +66,8 @@ export default function Home() {
         <Footer />
 
         {/* Sign In Modal */}
-<Dialog
-  open={openSignInModal}
-  onClose={handleCloseSignInModal}
-  maxWidth="xs" // Adjust the maximum width of the dialog
-  fullWidth
-  PaperProps={{
-    sx: {
-      padding: 2, // Padding inside the dialog
-    },
-  }}
->
-  <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    Sign In
-    <IconButton
-      aria-label="close"
-      onClick={handleCloseSignInModal}
-      sx={{
-        color: (theme) => theme.palette.grey[500],
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-    </DialogTitle>
-    <DialogContent>
-      <Box
-        component="form"
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          mt: 2,
-        }}
-      >
-        {/* Email Field */}
-        <TextField
-          label="Email"
-          variant="outlined"
-          type="email"
-          required
-          fullWidth
-        />
-
-        {/* Password Field */}
-        <TextField
-          label="Password"
-          variant="outlined"
-          type="password"
-          required
-          fullWidth
-        />
-
-        {/* Sign In Button */}
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          type="submit"
-        >
-          Sign In
-        </Button>
-
-        {/* Register Option */}
-        <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
-          Don't have an account?{' '}
-          <Button variant="text" color="primary" onClick={() => {
-            // Logic to navigate to the registration page or open registration modal
-          }}>
-            Register
-          </Button>
-        </Typography>
-      </Box>
-    </DialogContent>
-  </Dialog>
+        <Signin open={openSignInModal} handleClose={handleCloseSignInModal} handleOpenSignUp={handleOpenSignUpModal} />
+        <Signup open={openSignUpModal} handleClose={handleCloseSignUpModal} handleOpenSignIn={handleOpenSignInModal} />
 
     </Box>
   );
