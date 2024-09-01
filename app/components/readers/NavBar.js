@@ -44,7 +44,7 @@ function NavBar() {
                         size="small"
                         aria-label="LAWTECH"
                         component="a"
-                        href="/material-ui/getting-started/templates/"
+                        href="/"
                         sx={{ display: { xs: 'none', sm: 'flex' } }}
                     >
                         LAWTECH

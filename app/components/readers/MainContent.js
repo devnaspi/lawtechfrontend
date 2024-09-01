@@ -8,11 +8,14 @@ import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import Author from './Author';
+import {useRouter} from 'next/navigation';
 
 const cardData = [
         {
+            id: 1,
             cover: 'https://picsum.photos/800/450?random=1',
             area: 'Administrative Law',
+            region: 'Africa',
             title: 'Revolutionizing software development with cutting-edge tools',
             description:
                 'Our latest engineering tools are designed to streamline workflows and boost productivity. Discover how these innovations are transforming the software development landscape.',
@@ -23,6 +26,7 @@ const cardData = [
             created_at: 'July 14, 2021'
         },
         {
+            id: 2,
             cover: 'https://picsum.photos/800/450?random=2',
             area: 'Civil Rights Law',
             title: 'Innovative product features that drive success',
@@ -69,12 +73,17 @@ const cardData = [
     textOverflow: 'ellipsis',
     });
 
-    export default function MainContent() {
+export default function MainContent() {
+        const router = useRouter()
         const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
 
         const handleFocus = (index) => {
             setFocusedCardIndex(index);
         };
+
+        const handleCardClick = (id) => {
+            router.push(`/articles/${id}`); // Navigate to the article details page
+        };        
 
         const handleBlur = () => {
             setFocusedCardIndex(null);
@@ -83,7 +92,7 @@ const cardData = [
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <Grid container spacing={2} columns={12}>
-                    <Grid size={{ xs: 6, md: 4 }}>
+                    <Grid size={{ xs: 6, md: 4 }} onClick={() => handleCardClick(cardData[0].id)}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(0)}
@@ -115,7 +124,7 @@ const cardData = [
                         <Author authors={cardData[0].authors} created_at={cardData[0].created_at} />
                         </SyledCard>
                     </Grid>
-                    <Grid size={{ xs: 6, md: 4 }}>
+                    <Grid size={{ xs: 6, md: 4 }} onClick={() => handleCardClick(cardData[1].id)}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(1)}
@@ -147,7 +156,7 @@ const cardData = [
                         <Author authors={cardData[1].authors} created_at={cardData[1].created_at} />
                         </SyledCard>
                     </Grid>
-                    <Grid size={{ xs: 6, md: 4 }}>
+                    <Grid size={{ xs: 6, md: 4 }} onClick={() => handleCardClick(cardData[1].id)}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(1)}
@@ -179,7 +188,7 @@ const cardData = [
                         <Author authors={cardData[1].authors} created_at={cardData[1].created_at} />
                         </SyledCard>
                     </Grid>
-                    <Grid size={{ xs: 6, md: 4 }}>
+                    <Grid size={{ xs: 6, md: 4 }} onClick={() => handleCardClick(cardData[1].id)}>
                         <SyledCard
                         variant="outlined"
                         onFocus={() => handleFocus(1)}

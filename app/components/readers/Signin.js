@@ -68,6 +68,7 @@ export default function Signin({ open, handleClose }) {
                 color="primary"
                 onClick={() => {
                     router.push('/sign-up')
+                    window.location.reload()
                 }}
             >
                 Register

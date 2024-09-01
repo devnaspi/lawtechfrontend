@@ -190,6 +190,7 @@ export default function Signup({ open, handleClose }) {
                 color="primary"
                 onClick={() => {
                     router.push('/login')
+                    window.location.reload()
                 }}
             >
                 Login
