@@ -24,7 +24,7 @@ export default function ClientLayout({ children }) {
         } else if (path === '/sign-up') {
             setOpenSignUpModal(true);
             setOpenSignInModal(false);
-        } else if (path.startsWith('/articles/') || path === '/' || path.startsWith('/profile') || path.startsWith('/explore')) {
+        } else if (path.startsWith('/articles/') || path === '/' || path.startsWith('/profile') || path.startsWith('/explore') || path.startsWith('/verification')) {
             // Do nothing, allow the route
         } else {
             router.push('/404');

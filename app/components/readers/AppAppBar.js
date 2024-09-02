@@ -41,9 +41,6 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
                     Explore
                 </Button>
                 <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                    Authors
-                </Button>
-                <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
                     Law Firms
                 </Button>
             </Box>
