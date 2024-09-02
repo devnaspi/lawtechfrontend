@@ -37,7 +37,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
         <StyledToolbar variant="dense" disableGutters>
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>            
-                <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
+                <Button href='/explore' variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
                     Explore
                 </Button>
                 <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>

@@ -11,48 +11,50 @@ import Signup from './components/readers/Signup';
 import { useRouter } from 'next/navigation';
 
 export default function ClientLayout({ children }) {
-const [openSignInModal, setOpenSignInModal] = useState(false);
-const [openSignUpModal, setOpenSignUpModal] = useState(false);
-const router = useRouter();
+    const [openSignInModal, setOpenSignInModal] = useState(false);
+    const [openSignUpModal, setOpenSignUpModal] = useState(false);
+    const router = useRouter();
 
-useEffect(() => {
-    const path = window.location.pathname
-    
-    if (path === '/login') {
-        setOpenSignUpModal(false);
-        setOpenSignInModal(true);
-    } else if (path === '/sign-up') {
-        setOpenSignUpModal(true);
-        setOpenSignInModal(false);
-    } 
-    
-    else if (path.startsWith('/articles/') || path === '/') {} 
-    else {
-        router.push('/404');
-    }
-}, []);
+    useEffect(() => {
+        const path = window.location.pathname;
+        
+        if (path === '/login') {
+            setOpenSignUpModal(false);
+            setOpenSignInModal(true);
+        } else if (path === '/sign-up') {
+            setOpenSignUpModal(true);
+            setOpenSignInModal(false);
+        } else if (path.startsWith('/articles/') || path === '/' || path.startsWith('/profile') || path.startsWith('/explore')) {
+            // Do nothing, allow the route
+        } else {
+            router.push('/404');
+        }
+    }, []);
 
-const handleCloseModals = () => {
-    router.push('/'); 
-    window.location.reload()
-};
+    const handleCloseModals = () => {
+        router.push('/'); 
+        window.location.reload();
+    };
 
-return (
-    <>
-    <CssBaseline />
-    <NavBar />
-    <AppAppBar />
-    
-    {/* Render the page content */}
-    <main>{children}</main>
-    
-    <Footer />
+    // Determine whether to show the AppBar based on the current path
+    const showAppBar = window.location.pathname !== '/profile';
 
-    {/* Sign In Modal */}
-    <Signin open={openSignInModal} handleClose={handleCloseModals}/>
+    return (
+        <>
+            <CssBaseline />
+            <NavBar />
+            {showAppBar && <AppAppBar />}
+            
+            {/* Render the page content */}
+            <main>{children}</main>
+            
+            <Footer />
 
-    {/* Sign Up Modal */}
-    <Signup open={openSignUpModal} handleClose={handleCloseModals} />
-</>
-);
+            {/* Sign In Modal */}
+            <Signin open={openSignInModal} handleClose={handleCloseModals} />
+
+            {/* Sign Up Modal */}
+            <Signup open={openSignUpModal} handleClose={handleCloseModals} />
+        </>
+    );
 }
