@@ -11,7 +11,7 @@ const [openDialog, setOpenDialog] = useState(true); // Initialize dialog open st
 
 const handleCloseDialog = () => {
 setOpenDialog(false);
-router.push('/'); // Navigate back to the home page
+router.push('/readers/'); // Navigate back to the home page
 };
 
 useEffect(() => {
