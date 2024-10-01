@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import { Box, Typography } from '@mui/material';
+import { formatDate } from '@/app/utils/formatDate';
 
 
 function Author({ authors, created_at }) {
@@ -33,7 +34,7 @@ function Author({ authors, created_at }) {
             {authors.map((author) => author.name).join(', ')}
         </Typography>
         </Box>
-        <Typography variant="caption">{ created_at }</Typography>
+        <Typography variant="caption">{ formatDate(created_at) }</Typography>
     </Box>
     );
 }

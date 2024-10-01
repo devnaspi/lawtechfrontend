@@ -19,10 +19,13 @@
     "@tiptap/extension-underline": "^2.6.6",
     "@tiptap/react": "^2.6.6",
     "@tiptap/starter-kit": "^2.6.6",
+    "axios": "^1.7.7",
     "framer-motion": "^11.3.30",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "next": "14.2.6",
+    "next-nprogress-bar": "^2.3.13",
+    "nprogress": "^0.2.0",
     "react": "^18",
     "react-dom": "^18",
     "react-share": "^5.1.0"

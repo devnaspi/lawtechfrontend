@@ -1,4 +1,3 @@
-// app/ClientLayout.js (Client Component)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,15 +7,17 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
-import { useRouter } from 'next/navigation';
+import { useRouter as useNavigationRouter } from 'next/navigation';
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
 export default function ClientLayout({ children }) {
     const [openSignInModal, setOpenSignInModal] = useState(false);
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
-    const router = useRouter();
+    const navigationRouter = useNavigationRouter();
+    
 
     useEffect(() => {
-        const path = window.location.pathname;
+        const path = window?.location?.pathname;
         
         if (path === '/readers/login') {
             setOpenSignUpModal(false);
@@ -36,17 +37,17 @@ export default function ClientLayout({ children }) {
             ) {
             // Do nothing, allow the route
         } else {
-            router.push('/readers/404');
+            navigationRouter.push('/readers/404');
         }
     }, []);
 
     const handleCloseModals = () => {
-        router.push('/readers/'); 
+        navigationRouter.push('/readers/'); 
         window.location.reload();
     };
 
     // Determine whether to show the AppBar based on the current path
-    const showAppBar = window.location.pathname !== '/profile';
+    const showAppBar = window?.location?.pathname !== '/profile';
 
     return (
         <>
@@ -64,6 +65,13 @@ export default function ClientLayout({ children }) {
 
             {/* Sign Up Modal */}
             <Signup open={openSignUpModal} handleClose={handleCloseModals} />
+            
+            <ProgressBar
+                height="4px"
+                color="#fffd00"
+                options={{ showSpinner: false }}
+                shallowRouting
+                />
         </>
     );
 }

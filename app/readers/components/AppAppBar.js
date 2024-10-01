@@ -31,7 +31,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
     return (
     <AppBar
         position="fixed"
-        sx={{ boxShadow: 0, bgcolor: 'transparent', backgroundImage: 'none', mt: 10 }}
+        sx={{ boxShadow: 0, bgcolor: 'transparent', zIndex: 3, backgroundImage: 'none', mt: 10 }}
     >
         <Container maxWidth="lg">
         <StyledToolbar variant="dense" disableGutters>
