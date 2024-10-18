@@ -1,38 +1,102 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Box, TextField, Button, Typography, Autocomplete, Chip } from '@mui/material';
-import TextEditor from '../../../components/TextEditor'; // Import the reusable TextEditor component
+import TextEditor from '../../../components/TextEditor';
+import { useRouter, useParams } from 'next/navigation';
+import axiosInstance from '@/lib/axios';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 const EditArticle = () => {
   const [articleData, setArticleData] = useState({
     title: '',
     content: '',
     tags: [],
+    categories: [],
+    regions: [],
   });
 
-  // Existing tags that are available for selection
-  const existingTags = ['Legal', 'Finance', 'Health', 'Education', 'Technology'];
+  const [existingTags, setExistingTags] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  const router = useRouter();
+  const { handleApiError } = useApiErrorHandler();
 
-  const handleSaveArticle = (noteDetails, attachments) => {
-    // Update article data with content from TextEditor
-    const updatedArticleData = {
-      ...articleData,
-      content: noteDetails.html, // Use the HTML content from the editor
+
+  useEffect(() => {
+    const fetchArticleDetails = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/articles/${id}/`);
+        const article = response.data;
+
+        setArticleData({
+          title: article.title,
+          content: article.content,
+          tags: article.tags.map(tag => tag),
+          categories: article.categories.map(category => category),
+          regions: article.regions.map(region => region),
+        });
+
+        const [tagsRes, categoriesRes, regionsRes] = await Promise.all([
+          axiosInstance.get('/api/tags/'),
+          axiosInstance.get('/api/categories/categories/'),
+          axiosInstance.get('/api/categories/regions/')
+        ]);
+
+        setExistingTags(tagsRes.data.results.map(tag => tag.name));
+        setCategories(categoriesRes.data.results.map(category => category.name));
+        setRegions(regionsRes.data.results.map(region => region.name));
+
+      } catch (error) {
+        handleApiError(error)
+      } finally {
+        setLoading(false);
+      }
     };
 
-    console.log('Article saved', updatedArticleData);
-    console.log('Attachments', attachments);
+    fetchArticleDetails();
+  }, [id]);
 
-    // Logic to save or update the article
-    // e.g., make an API call to save the article
+  const handleSaveArticle = async (noteDetails, attachments) => {
+    try {
+      const updatedArticleData = {
+        ...articleData,
+        content: noteDetails.html,
+      };
+
+      await axiosInstance.put(`/api/articles/${id}/`, updatedArticleData);
+
+      console.log('Article updated successfully');
+      router.push('/authors/manage-articles');
+    } catch (error) {
+      console.error('Failed to update article:', error);
+    }
   };
+
+  const handleInputChange = (field, value) => {
+    setArticleData({
+      ...articleData,
+      [field]: value,
+    });
+  };
+
+  if (loading) {
+      return (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+              <CircularProgress />
+          </Box>
+      );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5, mb: 4 }}>
       {/* Title */}
       <Typography variant="h4" gutterBottom>
-        {articleData.id ? 'Edit Article' : 'Edit Article'}
+        Edit Article
       </Typography>
 
       {/* Article Form */}
@@ -41,7 +105,7 @@ const EditArticle = () => {
         variant="outlined"
         fullWidth
         value={articleData.title}
-        onChange={(e) => setArticleData({ ...articleData, title: e.target.value })}
+        onChange={(e) => handleInputChange('title', e.target.value)}
         sx={{ mb: 4 }}
       />
 
@@ -49,9 +113,9 @@ const EditArticle = () => {
       <Autocomplete
         multiple
         freeSolo
-        options={existingTags} // Options for selection
+        options={existingTags}
         value={articleData.tags}
-        onChange={(event, newValue) => setArticleData({ ...articleData, tags: newValue })}
+        onChange={(event, newValue) => handleInputChange('tags', newValue)}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
             <Chip
@@ -65,12 +129,53 @@ const EditArticle = () => {
         renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
         sx={{ mt: 4, mb: 4 }}
       />
+
+      {/* Categories Autocomplete */}
+      <Autocomplete
+        multiple
+        options={categories}
+        value={articleData.categories}
+        onChange={(event, newValue) => handleInputChange('categories', newValue)}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              variant="outlined"
+              label={option}
+              {...getTagProps({ index })}
+              key={option}
+            />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
+        sx={{ mt: 4, mb: 4 }}
+      />
+
+      {/* Regions Autocomplete */}
+      <Autocomplete
+        multiple
+        options={regions}
+        value={articleData.regions}
+        onChange={(event, newValue) => handleInputChange('regions', newValue)}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              variant="outlined"
+              label={option}
+              {...getTagProps({ index })}
+              key={option}
+            />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} label="Regions" variant="outlined" />}
+        sx={{ mt: 4, mb: 4 }}
+      />
+
       {/* Integrating TextEditor Component */}
       <TextEditor
-        cta="Update Article" // Call-to-action button text
-        onCtaClick={handleSaveArticle} // Handler function for saving the article
+        initialContent={articleData.content}
+        cta="Update Article" 
+        onCtaClick={handleSaveArticle} 
       />
-      
     </Container>
   );
 };

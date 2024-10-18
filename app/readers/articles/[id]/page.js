@@ -3,19 +3,22 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bookmark, BookmarkBorder } from '@mui/icons-material';
-import { Container, Box, Typography, Avatar, Grid, Paper, CircularProgress, Stack, Card, CardMedia, CardContent, IconButton, TextField, Button, List, ListItem, ListItemText } from '@mui/material';
+import { Container, Box, Typography, Grid, Paper, CircularProgress, Stack, Card, CardMedia, CardContent, IconButton } from '@mui/material';
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton, FacebookIcon, TwitterIcon, WhatsappIcon } from 'react-share';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import axiosInstance from '@/lib/axios';
+import { useAuth } from '@/context/AuthContext';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 const ArticleDetails = ({ params }) => {
     const router = useRouter();
     const { id } = params;
     const [article, setArticle] = useState(null);
     const [similarArticles, setSimilarArticles] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const { auth } = useAuth(); 
+    const { handleApiError } = useApiErrorHandler();
+
 
     useEffect(() => {
         fetchArticle();
@@ -23,13 +26,17 @@ const ArticleDetails = ({ params }) => {
     }, [id]);
 
     const fetchArticle = async () => {
+        setLoading(true);
         try {
             const response = await axiosInstance.get(`/api/articles/${id}`);
             setArticle(response.data);
+            setIsBookmarked(response.data.is_bookmarked);
+
+            addToHistory(id);
         } catch (error) {
-            console.error('Failed to fetch articles:', error);
+            console.error('Failed to fetch article:', error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -38,14 +45,35 @@ const ArticleDetails = ({ params }) => {
             const response = await axiosInstance.get(`/api/articles/${id}/read-more/?limit=4`);
             setSimilarArticles(response.data.results);
         } catch (error) {
-            console.error('Failed to fetch articles:', error);
-        } finally {
-            setLoading(false); 
+            console.error('Failed to fetch similar articles:', error);
         }
-    }
+    };
 
-    const handleBookmarkToggle = () => {
-        setIsBookmarked((prevState) => !prevState); // Toggle bookmark state
+    const addToHistory = async (articleId) => {
+        try {
+            await axiosInstance.post('/api/history/', { article_id: articleId });
+        } catch (error) {
+            console.log(error)
+            handleApiError(error)
+        }
+    };
+
+    const handleBookmarkToggle = async () => {
+        if (!auth.isAuthenticated) {
+            router.push(`/readers/login?redirect=/readers/articles/${id}`);
+            return;
+        }
+
+        try {
+            if (isBookmarked) {
+                await axiosInstance.post(`/api/articles/${id}/toggle-bookmark/`);
+            } else {
+                await axiosInstance.post(`/api/articles/${id}/toggle-bookmark/`);
+            }
+            setIsBookmarked((prevState) => !prevState);
+        } catch (error) {
+            console.error('Failed to toggle bookmark:', error);
+        }
     };
 
     if (loading) {
@@ -85,7 +113,7 @@ const ArticleDetails = ({ params }) => {
             <Box
                 component="img"
                 src={article.cover_picture}
-                alt={"cover img"}
+                alt="cover img"
                 sx={{
                     width: '100%',
                     maxHeight: '350px',
@@ -95,11 +123,11 @@ const ArticleDetails = ({ params }) => {
                 }}
             />
 
-            {/* Share, Bookmark and Download Buttons */}
+            {/* Share, Bookmark, and Download Buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                 {/* Share Buttons */}
                 <Stack direction="row" spacing={2}>
-                    <FacebookShareButton url={window.location.href} quote={article.title}>
+                    <FacebookShareButton url={window.location.href} quote={article.title} title={article.title}>
                         <FacebookIcon size={32} round />
                     </FacebookShareButton>
                     <TwitterShareButton url={window.location.href} title={article.title}>
@@ -110,13 +138,13 @@ const ArticleDetails = ({ params }) => {
                     </WhatsappShareButton>
                 </Stack>
 
-                {/* Bookmark and Download Buttons */}
+                {/* Bookmark Button */}
                 <Stack direction="row" spacing={2}>
                     <IconButton onClick={handleBookmarkToggle}>
                         {isBookmarked ? <Bookmark color="primary" /> : <BookmarkBorder />}
                     </IconButton>
                 </Stack>
-            </Box> 
+            </Box>
 
             {/* Article Title */}
             <Typography variant="h3" gutterBottom>
@@ -125,7 +153,6 @@ const ArticleDetails = ({ params }) => {
 
             {/* Main Content */}
             <div id="article-content">
-                {/* Article Body */}
                 <Paper sx={{ p: 4 }}>
                     <Typography 
                     variant="body1" 
@@ -149,7 +176,7 @@ const ArticleDetails = ({ params }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
-                            height: '100%', // Make card height consistent
+                            height: '100%',
                         }}
                         onClick={() => router.push(`/readers/articles/${article.id}`)}
                         >
@@ -158,13 +185,13 @@ const ArticleDetails = ({ params }) => {
                             image={article.cover_picture}
                             alt={article.title}
                             sx={{
-                            height: 140, // Set fixed height for the image
-                            objectFit: 'cover', // Cover the area without distorting the image
+                            height: 140,
+                            objectFit: 'cover',
                             }}
                         />
                         <CardContent
                             sx={{
-                            flexGrow: 1, // Allow content to grow and fill available space
+                            flexGrow: 1,
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
@@ -184,14 +211,13 @@ const ArticleDetails = ({ params }) => {
                                     textOverflow: 'ellipsis',
                                 }}
                                 dangerouslySetInnerHTML={{ __html: article.content }}
-                                />
+                            />
                         </CardContent>
                         </Card>
                     </Grid>
                     ))}
                 </Grid>
             </Box>
-
         </Container>
     );
 };

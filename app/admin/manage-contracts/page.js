@@ -6,7 +6,6 @@ import { Container, Typography, Grid, Card, CardContent, IconButton, Box } from 
 import { Edit, Delete } from '@mui/icons-material';
 import { useRouter } from 'next/navigation'; // Import the useRouter hook
 
-// Sample data for contracts
 const contractsData = [
   { id: 1, name: 'Non-Disclosure Agreement', fields: ['Party A', 'Party B', 'Effective Date'] },
   { id: 2, name: 'Employment Contract', fields: ['Employee Name', 'Position', 'Start Date'] },
@@ -14,10 +13,9 @@ const contractsData = [
 
 const ManageContracts = () => {
   const [contracts, setContracts] = useState(contractsData);
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
   const handleEditContract = (id) => {
-    // Navigate to the edit contract page with the contract ID
     router.push(`/lawfirms/manage-contracts/${id}`);
   };
 

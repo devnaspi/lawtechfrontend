@@ -7,7 +7,6 @@ const Page = ({ params }) => {
     const slug = params.slug
     useEffect(() => {
         console.log('slug is ', slug)
-        // Function to query the backend to verify the account
     })
 
     if (!slug || slug[0] === 'login') {
@@ -21,7 +20,6 @@ const Page = ({ params }) => {
         );
     }
 
-    // Fallback for other routes
     return (
         <Home />
     );

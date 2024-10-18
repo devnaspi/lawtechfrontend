@@ -7,71 +7,65 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
-import { useRouter as useNavigationRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import { usePathname } from 'next/navigation';
+import { SnackbarProvider } from 'notistack';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ClientLayout({ children }) {
     const [openSignInModal, setOpenSignInModal] = useState(false);
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
-    const navigationRouter = useNavigationRouter();
-    
+    const [showAppBar, setShowAppBar] = useState(true);
+    const router = useRouter();
+    const pathname = usePathname();
+    const { auth, loading } = useAuth();
 
     useEffect(() => {
-        const path = window?.location?.pathname;
-        
-        if (path === '/readers/login') {
+        if (pathname === '/readers/login') {
             setOpenSignUpModal(false);
             setOpenSignInModal(true);
-        } else if (path === '/readers/sign-up') {
+        } else if (pathname === '/readers/sign-up') {
             setOpenSignUpModal(true);
             setOpenSignInModal(false);
-        } else if (
-            path.startsWith('/readers')     
-            || path.startsWith('/readers/articles/') 
-            || path === '/' 
-            || path.startsWith('/readers/profile') 
-            || path.startsWith('/readers/explore') 
-            || path.startsWith('/readers/verification')
-            || path.startsWith('/readers/contracts')
-            || path.startsWith('/readers/lawfirms')
-            ) {
-            // Do nothing, allow the route
         } else {
-            navigationRouter.push('/readers/404');
+            setOpenSignInModal(false);
+            setOpenSignUpModal(false);
         }
-    }, []);
+
+        setShowAppBar(pathname !== '/readers/profile');
+
+        const protectedRoutes = ['/readers/contracts', '/readers/profile'];
+
+        if (!loading) {
+            if (protectedRoutes.includes(pathname) && !auth.isAuthenticated) {
+                router.push('/readers/login');
+            }
+        }
+    }, [pathname, auth.isAuthenticated, loading, router]);
 
     const handleCloseModals = () => {
-        navigationRouter.push('/readers/'); 
-        window.location.reload();
+        setOpenSignInModal(false);
+        setOpenSignUpModal(false);
+        router.push('/readers/');
     };
-
-    // Determine whether to show the AppBar based on the current path
-    const showAppBar = window?.location?.pathname !== '/profile';
 
     return (
         <>
-            <CssBaseline />
-            <NavBar />
-            {showAppBar && <AppAppBar />}
-            
-            {/* Render the page content */}
-            <main>{children}</main>
-            
-            <Footer />
+            <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                <CssBaseline />
+                <NavBar />
+                {showAppBar && <AppAppBar />}
+                
+                <main>{children}</main>
+                
+                <Footer />
 
-            {/* Sign In Modal */}
-            <Signin open={openSignInModal} handleClose={handleCloseModals} />
-
-            {/* Sign Up Modal */}
-            <Signup open={openSignUpModal} handleClose={handleCloseModals} />
-            
-            <ProgressBar
-                height="4px"
-                color="#fffd00"
-                options={{ showSpinner: false }}
-                shallowRouting
-                />
+                <Signin open={openSignInModal} handleClose={handleCloseModals} />
+                <Signup open={openSignUpModal} handleClose={handleCloseModals} />
+                
+                <ProgressBar height="2px" color="green" options={{ showSpinner: false }} shallowRouting />
+            </SnackbarProvider>
         </>
     );
 }

@@ -16,7 +16,6 @@ import {
     ListItemText,
 } from '@mui/material';
 
-// Sample data for law firm details
 const lawFirmDetailData = {
     id: 1,
     name: 'Smith & Associates',
@@ -35,16 +34,12 @@ const lawFirmDetailData = {
 
 const LawFirmDetail = ({ params }) => {
     const router = useRouter();
-    const { id } = params; // Get the law firm ID from the route
+    const { id } = params;
     const [lawFirm, setLawFirm] = useState(null);
 
     useEffect(() => {
-        // Fetch law firm details from backend API
         const fetchLawFirmDetails = async () => {
-            // Uncomment the lines below to fetch from the backend
-            // const response = await fetch(`/api/lawfirms/${id}`);
-            // const data = await response.json();
-            setLawFirm(lawFirmDetailData); // Replace with `data` once backend is available
+            setLawFirm(lawFirmDetailData);
         };
 
         fetchLawFirmDetails();
@@ -100,7 +95,7 @@ const LawFirmDetail = ({ params }) => {
                         <ListItem key={article.id}>
                             <ListItemText
                                 primary={article.title}
-                                onClick={() => router.push(`/readers/articles/${article.id}`)} // Navigate to article detail page
+                                onClick={() => router.push(`/readers/articles/${article.id}`)}
                                 sx={{ cursor: 'pointer' }}
                             />
                         </ListItem>
@@ -118,7 +113,7 @@ const LawFirmDetail = ({ params }) => {
                         <ListItem key={contract.id}>
                             <ListItemText
                                 primary={contract.name}
-                                onClick={() => router.push(`/readers/contracts/${contract.id}`)} // Navigate to contract detail page
+                                onClick={() => router.push(`/readers/contracts/${contract.id}`)}
                                 sx={{ cursor: 'pointer' }}
                             />
                         </ListItem>

@@ -1,47 +1,104 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Box, TextField, Button, Avatar, Typography, IconButton, Autocomplete, Chip } from '@mui/material';
 import { PhotoCamera } from '@mui/icons-material';
+import axiosInstance from '@/lib/axios';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useSnackbar } from 'notistack';
+import { useAuth } from '@/context/AuthContext';
+
 
 const ManageProfile = () => {
-    const [profile, setProfile] = useState({
-        name: 'John Doe',
-        bio: 'Experienced legal writer.',
-        email: 'john.doe@example.com',
-        profilePicture: '/static/images/avatar/1.jpg', // Example image
-        specialties: [], // State to store selected tags
-    });
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [specialties, setSpecialties] = useState([]);
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [profilePicturePreview, setProfilePicturePreview] = useState('/static/images/avatar/1.jpg');
 
-    // Example tags that an author might specialize in
-    const tags = ['Criminal Law', 'Civil Rights', 'Corporate Law', 'Intellectual Property', 'Family Law'];
+
+    const [existingTags, setExistingTags] = useState([]);
+    const { handleApiError } = useApiErrorHandler();
+    const { enqueueSnackbar } = useSnackbar();
+    const { auth, setAuth, loading, logout } = useAuth();
+
+
+    useEffect(() => {
+        console.log(auth?.user)
+        if (!loading && name === '') {
+            setName(auth.user?.user?.username || '');
+        }
+        if (!loading && email === '') {
+            setEmail(auth.user?.user?.email || '');
+        }
+        if (!loading && profilePicturePreview === '/static/images/avatar/1.jpg') {
+            setProfilePicturePreview(auth.user?.user?.profile_picture || '/static/images/avatar/1.jpg');
+        }
+        if (!loading) {
+            setSpecialties(auth.user?.tags)
+        }
+
+        const fetchProfileDetails = async () => {
+            try {
+                const tagsResponse = await axiosInstance.get('/api/tags/');
+                setExistingTags(tagsResponse.data.results.map(tag => tag.name));
+            }
+            catch (error) {
+                handleApiError(error);
+            }
+        };
+
+        fetchProfileDetails();
+    }, []);
 
     const handleProfilePictureChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             const imageUrl = URL.createObjectURL(file);
-            setProfile({ ...profile, profilePicture: imageUrl });
+            setProfilePicturePreview(imageUrl);
+            setProfilePicture(file);
         }
     };
 
-    const handleSaveProfile = () => {
-        // Logic to save the profile changes, e.g., API call
-        console.log('Profile saved', profile);
+    const handleSaveProfile = async () => {
+        try {
+            console.log("specialites is ", specialties)
+            const formData = new FormData();
+            formData.append('username', name);
+            formData.append('email', email);
+            formData.append('tags', specialties)
+            if (profilePicture instanceof File) {
+                formData.append('profile_picture', profilePicture);
+            }
+            console.log('formdata is ', formData)
+            await axiosInstance.put('/api/authors/profile/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            
+            const response = await axiosInstance.get('/api/authors/profile/');
+            const updatedUser = response.data;
 
-        // Example: Make an API call to update the profile
-        // fetch('/api/updateProfile', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(profile)
-        // })
-        // .then(response => response.json())
-        // .then(data => {
-        //     console.log('Profile updated:', data);
-        // })
-        // .catch(error => {
-        //     console.error('Error updating profile:', error);
-        // });
+            setAuth((prevAuth) => ({
+                ...prevAuth,
+                user: updatedUser,
+            }));
+            enqueueSnackbar('Profile updated successfully', { variant: 'success' });
+
+        } catch (error) {
+            handleApiError(error);
+        }
     };
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -50,22 +107,24 @@ const ManageProfile = () => {
                 Manage Profile
             </Typography>
 
-            {/* Profile Picture Section */}
             <Box sx={{ textAlign: 'center', mb: 4 }}>
                 <Avatar
-                    alt={profile.name}
-                    src={profile.profilePicture}
+                    alt={name}
+                    src={profilePicturePreview}
                     sx={{ width: 100, height: 100, mx: 'auto' }}
                 />
                 <IconButton
                     color="primary"
                     aria-label="upload picture"
                     component="label"
-                    sx={{ mt: 1 }}
+                    sx={{ mt: -3, ml: 3 }}
                 >
                     <input hidden accept="image/*" type="file" onChange={handleProfilePictureChange} />
                     <PhotoCamera />
                 </IconButton>
+                <Typography variant="h6" gutterBottom>
+                    {name}
+                </Typography>
             </Box>
 
             {/* Profile Form */}
@@ -73,19 +132,8 @@ const ManageProfile = () => {
                 label="Name"
                 variant="outlined"
                 fullWidth
-                value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                sx={{ mb: 3 }}
-            />
-
-            <TextField
-                label="Bio"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={3}
-                value={profile.bio}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 sx={{ mb: 3 }}
             />
 
@@ -93,8 +141,8 @@ const ManageProfile = () => {
                 label="Email"
                 variant="outlined"
                 fullWidth
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{ mb: 3 }}
             />
 
@@ -102,9 +150,9 @@ const ManageProfile = () => {
             <Autocomplete
                 multiple
                 freeSolo
-                options={tags} // Options for selection
-                value={profile.specialties}
-                onChange={(event, newValue) => setProfile({ ...profile, specialties: newValue })}
+                options={existingTags}
+                value={specialties}
+                onChange={(event, newValue) => setSpecialties(newValue)}
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip

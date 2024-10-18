@@ -1,27 +1,70 @@
-// app/lawfirms/manage-authors.js
 'use client';
 
 import React, { useState } from 'react';
-import { Container, Typography, Grid, Card, CardContent, IconButton, Box } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, IconButton, Box, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
-
-// Sample data for authors
-const authorsData = [
-  { id: 1, name: 'Jane Doe', email: 'jane@example.com', specialties: ['Criminal Law', 'Civil Rights'] },
-  { id: 2, name: 'John Smith', email: 'john@example.com', specialties: ['Contract Law'] },
-];
+import axiosInstance from '@/lib/axios';
+import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
 
 const ManageAuthors = () => {
-  const [authors, setAuthors] = useState(authorsData);
+  const [authors, setAuthors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  React.useEffect(() => {
+    const fetchAuthors = async () => {
+      try {
+        const response = await axiosInstance.get('/api/lawfirms/authors/');
+        setAuthors(response.data.results);
+        setLoading(false);
+      } catch (error) {
+        enqueueSnackbar('Failed to fetch authors', { variant: 'error' });
+        setLoading(false);
+      }
+    };
+
+    fetchAuthors();
+  }, []);
 
   const handleEditAuthor = (id) => {
-    // Logic to navigate to edit author page
-    console.log('Edit author:', id);
+    router.push(`/lawfirms/manage-authors/${id}`);
   };
 
-  const handleDeleteAuthor = (id) => {
-    setAuthors(authors.filter((author) => author.id !== id));
+  const handleOpenDeleteDialog = (author) => {
+    setSelectedAuthor(author);
+    setOpenDeleteDialog(true);
   };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setSelectedAuthor(null);
+  };
+
+  const handleDeleteAuthor = async () => {
+    if (!selectedAuthor) return;
+    try {
+      await axiosInstance.delete(`/api/lawfirms/authors/${selectedAuthor.id}/`);
+      setAuthors(authors.filter((author) => author.id !== selectedAuthor.id));
+      enqueueSnackbar('Author deleted successfully', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Failed to delete author', { variant: 'error' });
+    } finally {
+      handleCloseDeleteDialog(); 
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, textAlign: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -34,19 +77,19 @@ const ManageAuthors = () => {
           <Grid item xs={12} sm={6} md={4} key={author.id}>
             <Card>
               <CardContent>
-                <Typography variant="h6">{author.name}</Typography>
+                <Typography variant="h6">{author.user.username}</Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Email: {author.email}
+                  Email: {author.user.email}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Specialties: {author.specialties.join(', ')}
+                  Specialties: {author.tags.map(tag => tag).join(', ')}
                 </Typography>
 
                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
                   <IconButton color="primary" onClick={() => handleEditAuthor(author.id)}>
                     <Edit />
                   </IconButton>
-                  <IconButton color="error" onClick={() => handleDeleteAuthor(author.id)}>
+                  <IconButton color="error" onClick={() => handleOpenDeleteDialog(author)}>
                     <Delete />
                   </IconButton>
                 </Box>
@@ -55,6 +98,24 @@ const ManageAuthors = () => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete author "{selectedAuthor?.user?.username}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteAuthor} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

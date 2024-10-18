@@ -2,61 +2,79 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Box, Typography, Grid, Card, CardContent, CardMedia, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-
-// Law categories
-const lawAreas = ['Administrative Law', 'Civil Rights Law', 'Criminal Law', 'Family Law', 'Technology Law'];
-const regions = ['Africa', 'Asia', 'Europe', 'North America', 'South America'];
-
-// Sample data for articles
-const articlesData = [
-    {
-        id: 1,
-        cover: 'https://picsum.photos/800/450?random=1',
-        title: 'Revolutionizing software development with cutting-edge tools',
-        description: 'Discover how these innovations are transforming the software development landscape.',
-        area: 'Technology Law',
-        region: 'North America',
-    },
-    {
-        id: 2,
-        cover: 'https://picsum.photos/800/450?random=2',
-        title: 'Innovative product features that drive success',
-        description: 'Explore the key features of our latest product release...',
-        area: 'Civil Rights Law',
-        region: 'Europe',
-    },
-    {
-        id: 3,
-        cover: 'https://picsum.photos/800/450?random=3',
-        title: 'How to build scalable applications in 2024',
-        description: 'Scalability is key for modern applications...',
-        area: 'Technology Law',
-        region: 'Asia',
-    },
-    // Add more articles as needed
-];
+import { Container, Box, Typography, Grid, Card, CardContent, CardMedia, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
+import axiosInstance from '@/lib/axios';
+import StyledTypography from '../components/StyledTypography';
 
 const Explore = () => {
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedRegion, setSelectedRegion] = useState('');
-    const [filteredArticles, setFilteredArticles] = useState(articlesData);
+    const [selectedCategory, setSelectedCategory] = useState('Any');
+    const [categories, setCategories] = useState([]);
+    const [regions, setRegions] = useState([]);
+    const [selectedRegion, setSelectedRegion] = useState('Any');
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [noResults, setNoResults] = useState(false);
     const router = useRouter();
 
-    // Update filtered articles based on selected filters
+    const fetchCategories = async () => {
+        setLoading(true);
+
+        try {
+            const response = await axiosInstance.get('/api/categories/categories');
+            const results = response.data.results;
+            setCategories(results);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+        setLoading(false);
+    };
+    
+    const fetchRegions = async () => {
+        setLoading(true);
+
+        try {
+            const response = await axiosInstance.get('/api/categories/regions');
+            const results = response.data.results;
+            setRegions(results);
+        } catch (error) {
+            console.error("Error fetching regions:", error);
+        }
+        setLoading(false);
+    };
+
+    const fetchArticles = async () => {
+        setLoading(true);
+        setArticles([]); 
+        setNoResults(false);
+
+        try {
+            const params = {
+                category: selectedCategory !== 'Any' ? selectedCategory : undefined,
+                region: selectedRegion !== 'Any' ? selectedRegion : undefined,
+            };
+            
+            const response = await axiosInstance.get('/api/articles/', { params });
+            const results = response.data.results;
+
+            if (results.length > 0) {
+                setArticles(results);
+            } else {
+                setNoResults(true);
+            }
+        } catch (error) {
+            console.error("Error fetching articles:", error);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
-        const filtered = articlesData.filter(article => {
-            return (
-                (selectedCategory ? article.area === selectedCategory : true) &&
-                (selectedRegion ? article.region === selectedRegion : true)
-            );
-        });
-        setFilteredArticles(filtered);
+        fetchCategories();
+        fetchRegions();
+        fetchArticles();
     }, [selectedCategory, selectedRegion]);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 20, mb: 4, minHeight: '70vh' }}>
-            {/* Title */}
             <Typography variant="h4" gutterBottom mb={3}>
                 Explore
             </Typography>
@@ -70,10 +88,10 @@ const Explore = () => {
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
                         >
-                            <MenuItem value="">All Categories</MenuItem>
-                            {lawAreas.map((category) => (
-                                <MenuItem key={category} value={category}>
-                                    {category}
+                            <MenuItem value="Any">Any</MenuItem>
+                            {categories.map((category) => (
+                                <MenuItem key={category.id} value={category.name} sx={{ textTransform: 'capitalize' }}>
+                                    {category.name}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -86,10 +104,10 @@ const Explore = () => {
                             value={selectedRegion}
                             onChange={(e) => setSelectedRegion(e.target.value)}
                         >
-                            <MenuItem value="">All Regions</MenuItem>
+                            <MenuItem value="Any">Any</MenuItem>
                             {regions.map((region) => (
-                                <MenuItem key={region} value={region}>
-                                    {region}
+                                <MenuItem key={region.id} value={region.name} sx={{ textTransform: 'capitalize' }}>
+                                    {region.name}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -101,52 +119,59 @@ const Explore = () => {
             <Typography variant="h5" gutterBottom>
                 Articles
             </Typography>
-            <Grid container spacing={4}>
-                {filteredArticles.length > 0 ? (
-                    filteredArticles.map((article) => (
-                        <Grid item xs={12} sm={6} md={4} key={article.id}>
-                            <Card
-                                sx={{ cursor: 'pointer' }}
-                                onClick={() => router.push(`/readers/articles/${article.id}`)}
+
+            {loading ? (
+                <Box display="flex" justifyContent="center">
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <Grid container spacing={4}>
+                    {articles.length > 0 ? (
+                        articles.map((article) => (
+                            <Grid item xs={12} sm={6} md={4} key={article.id}>
+                                <Card
+                                    sx={{ cursor: 'pointer' }}
+                                    onClick={() => router.push(`/readers/articles/${article.id}`)}
+                                >
+                                    <CardMedia
+                                        component="img"
+                                        image={article.cover_picture}
+                                        alt={article.title}
+                                        sx={{ height: 140, objectFit: 'cover' }}
+                                    />
+                                    <CardContent>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            {article.title}
+                                        </Typography>
+                                        <StyledTypography 
+                                        variant="body2" 
+                                        color="textSecondary"
+                                        dangerouslySetInnerHTML={{ __html: article.content }}
+                                        />
+                                        
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))
+                    ) : (
+                        <Grid item xs={12}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    minHeight: '200px',
+                                    textAlign: 'center',
+                                }}
                             >
-                                <CardMedia
-                                    component="img"
-                                    image={article.cover}
-                                    alt={article.title}
-                                    sx={{
-                                        height: 140, // Fixed height for the image
-                                        objectFit: 'cover', // Cover the area without distorting the image
-                                    }}
-                                />
-                                <CardContent>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        {article.title}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {article.description}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
+                                <Typography variant="h6" color="textSecondary">
+                                    No articles found for the selected filters.
+                                </Typography>
+                            </Box>
                         </Grid>
-                    ))
-                ) : (
-                    <Grid item xs={12}>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                minHeight: '200px', // Adjust height as needed
-                                textAlign: 'center',
-                            }}
-                        >
-                            <Typography variant="h6" color="textSecondary">
-                                No articles found for the selected filters.
-                            </Typography>
-                        </Box>
-                    </Grid>
-                )}
-            </Grid>
+                    )}
+                </Grid>
+            )}
 
         </Container>
     );

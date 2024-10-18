@@ -6,83 +6,212 @@ import {
     Container,
     Box,
     Typography,
-    TextField,
     Avatar,
     Button,
     Divider,
-    Grid,
     IconButton,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Select,
+    TextField,
     Stack,
     Tabs,
     Tab,
+    CircularProgress,
+    Alert,
     List,
     ListItem,
-    ListItemText,
+    ListItemText
 } from '@mui/material';
 import { PhotoCamera } from '@mui/icons-material';
+import axiosInstance from '@/lib/axios';
+import { useAuth } from '@/context/AuthContext';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+import { useSnackbar } from 'notistack';
+import { styled } from '@mui/material/styles';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import StyledTypography from '../components/StyledTypography';
+import Author from '../components/Author';
+import Grid from '@mui/material/Grid2';
 
-const regions = ['Africa', 'Asia', 'Europe', 'North America', 'South America'];
-const lawAreas = ['Administrative Law', 'Civil Rights Law', 'Criminal Law', 'Family Law', 'Technology Law'];
+
+const SyledCard = styled(Card)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    padding: 0,
+    height: '100%',
+    backgroundColor: theme.palette.background.paper,
+    '&:hover': {
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    },
+    '&:focus-visible': {
+    outline: '3px solid',
+    outlineColor: 'hsla(210, 98%, 48%, 0.5)',
+    outlineOffset: '2px',
+    },
+}));
+
+const SyledCardContent = styled(CardContent)({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingTop: 10,
+    paddingBottom: 5,
+    flexGrow: 1,
+});
 
 const EditProfile = () => {
-    const [profilePicture, setProfilePicture] = useState('/static/images/avatar/1.jpg'); // Default profile picture
-    const [name, setName] = useState('John Doe');
-    const [email, setEmail] = useState('john.doe@example.com');
-    const [region, setRegion] = useState('Africa');
-    const [lawArea, setLawArea] = useState('Administrative Law');
-    const [experience, setExperience] = useState('');
-    const [phone, setPhone] = useState('');
+    const { handleApiError } = useApiErrorHandler();
+    const { auth, setAuth, loading, logout } = useAuth();
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [profilePicturePreview, setProfilePicturePreview] = useState('/static/images/avatar/1.jpg');
+    
     const [password, setPassword] = useState('');
-    const [selectedTab, setSelectedTab] = useState(0); // State to track the selected tab
-    const [bookmarkedArticles, setBookmarkedArticles] = useState([]); // State to store bookmarked articles
+    const [selectedTab, setSelectedTab] = useState(0);
+    const [success, setSuccess] = useState(null);
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+
+    const [bookmarks, setBookmarks] = useState([]);
+    const [readArticles, setReadArticles] = useState([]);
+    const [loadingData, setLoadingData] = useState(false);
+    const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
 
     const router = useRouter();
-
-    useEffect(() => {
-        // Load bookmarked articles from local storage when the component mounts
-        const bookmarks = JSON.parse(localStorage.getItem('bookmarkedArticles')) || [];
-        setBookmarkedArticles(bookmarks);
-    }, []);
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleProfilePictureChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             const imageUrl = URL.createObjectURL(file);
-            setProfilePicture(imageUrl);
+            setProfilePicturePreview(imageUrl);
+            setProfilePicture(file);
         }
     };
 
-    const handleSaveChanges = () => {
-        // Logic to save the changes, like an API call
-        console.log('Profile updated');
+    const handleFocus = (index) => {
+        setFocusedCardIndex(index);
+    };
+
+    const handleCardClick = (id) => {
+        router.push(`/readers/articles/${id}`);
+    };        
+
+    const handleBlur = () => {
+        setFocusedCardIndex(null);
+    };
+
+    useEffect(() => {
+        if (!loading && name === '') {
+            setName(auth.user?.username || '');
+        }
+        if (!loading && email === '') {
+            setEmail(auth.user?.email || '');
+        }
+        if (!loading && profilePicturePreview === '/static/images/avatar/1.jpg') {
+            setProfilePicturePreview(auth.user?.profile_picture || '/static/images/avatar/1.jpg');
+        }
+    }, [loading, auth]);
+
+    const handleSaveChanges = async () => {
+        setSuccess(null);
+        try {
+            const formData = new FormData();
+            formData.append('username', name);
+            formData.append('email', email);
+            if (password) {
+                formData.append('password', password);
+            }
+            if (profilePicture) {
+                formData.append('profile_picture', profilePicture);
+            }
+
+            await axiosInstance.put('/api/users/profile', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const response = await axiosInstance.get('/api/users/profile');
+            const updatedUser = response.data;
+
+            setAuth((prevAuth) => ({
+                ...prevAuth,
+                user: updatedUser,
+            }));
+            setSuccess('Profile updated successfully');
+        } catch (err) {
+            handleApiError(err);
+        }
     };
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
+
+        if (newValue === 1) {
+            fetchBookmarks();
+        } else if (newValue === 2) {
+            fetchReadArticles();
+        }
     };
+
+    const fetchBookmarks = async () => {
+        setLoadingData(true);
+        try {
+            const response = await axiosInstance.get('/api/bookmarks/');
+            setBookmarks(response.data.results);
+        } catch (err) {
+            handleApiError(err);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    const fetchReadArticles = async () => {
+        setLoadingData(true);
+        try {
+            const response = await axiosInstance.get('/api/history/');
+            setReadArticles(response.data.results);
+        } catch (err) {
+            handleApiError(err);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axiosInstance.post('/api/users/auth/logout');
+
+            logout();
+            enqueueSnackbar('Logout successful!', { variant: 'success' });
+            router.push('/readers');
+        } catch (err) {
+            handleApiError(err);
+        }
+    }
 
     return (
         <Container maxWidth="lg" sx={{ mb: 8, minHeight: '100vh', display: 'flex', position: 'relative' }}>
             {/* Side Panel with Tabs */}
             <Box
                 sx={{
-                    width: '250px', 
-                    position: 'fixed', 
+                    width: '250px',
+                    position: 'fixed',
                     top: '0',
                     left: '0',
-                    height: '70vh', 
+                    height: '70vh',
                     borderRight: 1,
                     borderColor: 'divider',
-                    pt: 10, 
+                    pt: 10,
                     bgcolor: 'background.paper',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-start', 
-                    
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
                 }}
             >
                 <Tabs
@@ -93,17 +222,28 @@ const EditProfile = () => {
                     sx={{ width: '100%' }}
                 >
                     <Tab label="Edit Profile" sx={{ alignItems: 'flex-start' }} />
-                    <Tab label="Bookmarked Articles" sx={{ alignItems: 'flex-start' }} />
+                    <Tab label="Bookmarks" sx={{ alignItems: 'flex-start' }} />
                     <Tab label="Read Articles" sx={{ alignItems: 'flex-start' }} />
                 </Tabs>
+
+                {/* Logout Button */}
+                <Button
+                    color="error"
+                    variant="text"
+                    size="small"
+                    sx={{ m: 2 }}
+                    onClick={handleLogout}
+                >
+                    Logout
+                </Button>
             </Box>
 
             {/* Main Content Area */}
             <Box
                 sx={{
-                    flexGrow: 1, // Allow main content to grow
-                    marginLeft: '250px', // Offset for the fixed side panel
-                    paddingTop: 10, // Align with the side panel's top padding
+                    flexGrow: 1,
+                    marginLeft: '150px',
+                    paddingTop: 10,
                 }}
             >
                 {selectedTab === 0 && (
@@ -112,7 +252,7 @@ const EditProfile = () => {
                         <Box sx={{ textAlign: 'center', mb: 4 }}>
                             <Avatar
                                 alt={name}
-                                src={profilePicture}
+                                src={profilePicturePreview}
                                 sx={{ width: 100, height: 100, mx: 'auto' }}
                             />
                             <IconButton
@@ -131,7 +271,12 @@ const EditProfile = () => {
 
                         <Divider sx={{ mb: 4 }} />
 
-                        {/* User Information Section */}
+                        {success && (
+                            <Alert severity="success" sx={{ mb: 2 }}>
+                                {success}
+                            </Alert>
+                        )}
+
                         <Typography variant="h6" gutterBottom>
                             User Information
                         </Typography>
@@ -150,47 +295,6 @@ const EditProfile = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="Phone Number"
-                            variant="outlined"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            sx={{ mb: 4 }}
-                        />
-
-                        {/* Professional Information Section */}
-                        <Typography variant="h6" gutterBottom>
-                            Professional Information
-                        </Typography>
-                        <FormControl fullWidth sx={{ mb: 2 }}>
-                            <InputLabel>Region</InputLabel>
-                            <Select value={region} onChange={(e) => setRegion(e.target.value)}>
-                                {regions.map((r) => (
-                                    <MenuItem key={r} value={r}>
-                                        {r}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth sx={{ mb: 2 }}>
-                            <InputLabel>Law Area</InputLabel>
-                            <Select value={lawArea} onChange={(e) => setLawArea(e.target.value)}>
-                                {lawAreas.map((area) => (
-                                    <MenuItem key={area} value={area}>
-                                        {area}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <TextField
-                            fullWidth
-                            label="Experience (Years)"
-                            variant="outlined"
-                            value={experience}
-                            onChange={(e) => setExperience(e.target.value)}
-                            sx={{ mb: 4 }}
                         />
 
                         {/* Account Settings Section */}
@@ -211,11 +315,13 @@ const EditProfile = () => {
 
                         {/* Save and Cancel Buttons */}
                         <Stack direction="row" spacing={2} justifyContent="flex-end">
-                            <Button variant="contained" color="primary" onClick={handleSaveChanges}>
-                                Save Changes
-                            </Button>
-                            <Button variant="outlined" color="secondary" onClick={() => router.back()}>
-                                Cancel
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleSaveChanges}
+                                disabled={loading}
+                            >
+                                {loading ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </Stack>
                     </>
@@ -223,22 +329,49 @@ const EditProfile = () => {
 
                 {selectedTab === 1 && (
                     <>
-                        {/* Bookmarked Articles Content */}
                         <Typography variant="h6" gutterBottom>
                             Bookmarked Articles
                         </Typography>
-                        {bookmarkedArticles.length > 0 ? (
-                            <List>
-                                {bookmarkedArticles.map((articleId) => (
-                                    <ListItem key={articleId}>
-                                        <ListItemText primary={`Article ID: ${articleId}`} />
-                                        {/* Add logic here to display more details about the bookmarked article */}
-                                    </ListItem>
-                                ))}
-                            </List>
+                        {loadingData ? (
+                            <CircularProgress />
+                        ) : bookmarks.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <Grid container spacing={2} columns={12}>
+                                        {bookmarks.map((bookmark, index) => (
+                                            <Grid size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(bookmark.article.id)}>
+                                                <SyledCard
+                                                variant="outlined"
+                                                onFocus={() => handleFocus(0)}
+                                                onBlur={handleBlur}
+                                                tabIndex={0}
+                                                className={focusedCardIndex === 0 ? 'Mui-focused' : ''}
+                                                >
+                                                    <CardMedia
+                                                        component="img"
+                                                        alt="cover"
+                                                        image={bookmark.article.cover_picture}
+                                                        aspect-ratio="16 / 9"
+                                                        sx={{
+                                                        borderBottom: '1px solid',
+                                                        borderColor: 'divider',
+                                                        }}
+                                                    />
+                                                    <SyledCardContent>
+                                                        <Typography gutterBottom variant="h6" component="div">
+                                                        {bookmark.article.title}
+                                                        </Typography>
+                                                        <StyledTypography variant="body2" color="text.secondary" gutterBottom
+                                                        dangerouslySetInnerHTML={{ __html: bookmark.article.content }} />
+                                                    </SyledCardContent>
+                                                    <Author authors={[bookmark.article.author]} created_at={bookmark.article.created_at} />
+                                                </SyledCard>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Box>
                         ) : (
                             <Typography variant="body1" color="textSecondary">
-                                No bookmarked articles found.
+                                No bookmarks found.
                             </Typography>
                         )}
                     </>
@@ -246,22 +379,49 @@ const EditProfile = () => {
 
                 {selectedTab === 2 && (
                     <>
-                        {/* Bookmarked Articles Content */}
                         <Typography variant="h6" gutterBottom>
                             Read Articles
                         </Typography>
-                        {bookmarkedArticles.length > 0 ? (
-                            <List>
-                                {bookmarkedArticles.map((articleId) => (
-                                    <ListItem key={articleId}>
-                                        <ListItemText primary={`Article ID: ${articleId}`} />
-                                        {/* Add logic here to display more details about the bookmarked article */}
-                                    </ListItem>
-                                ))}
-                            </List>
+                        {loadingData ? (
+                            <CircularProgress />
+                        ) : readArticles.length > 0 ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <Grid container spacing={2} columns={12}>
+                                        {readArticles.map((article, index) => (
+                                            <Grid size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(article.article.id)}>
+                                                <SyledCard
+                                                variant="outlined"
+                                                onFocus={() => handleFocus(0)}
+                                                onBlur={handleBlur}
+                                                tabIndex={0}
+                                                className={focusedCardIndex === 0 ? 'Mui-focused' : ''}
+                                                >
+                                                    <CardMedia
+                                                        component="img"
+                                                        alt="cover"
+                                                        image={article.article.cover_picture}
+                                                        aspect-ratio="16 / 9"
+                                                        sx={{
+                                                        borderBottom: '1px solid',
+                                                        borderColor: 'divider',
+                                                        }}
+                                                    />
+                                                    <SyledCardContent>
+                                                        <Typography gutterBottom variant="h6" component="div">
+                                                        {article.article.title}
+                                                        </Typography>
+                                                        <StyledTypography variant="body2" color="text.secondary" gutterBottom
+                                                        dangerouslySetInnerHTML={{ __html: article.article.content }} />
+                                                    </SyledCardContent>
+                                                    <Author authors={[article.article.author]} created_at={article.article.created_at} />
+                                                </SyledCard>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Box>
                         ) : (
                             <Typography variant="body1" color="textSecondary">
-                                You've not read any articles yet.
+                                No articles read yet.
                             </Typography>
                         )}
                     </>

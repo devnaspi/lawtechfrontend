@@ -1,4 +1,3 @@
-// components/reader/VerificationSuccess.js
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -8,8 +7,8 @@ const VerificationSuccess = ({ handleClose }) => {
   const router = useRouter();
 
   const handleSignInClick = () => {
-    handleClose(); // Close the modal
-    router.push('/readers/login'); // Navigate to the login page
+    handleClose(); 
+    router.push('/readers/login');
   };
 
   return (

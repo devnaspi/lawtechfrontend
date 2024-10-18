@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FormControl, OutlinedInput, InputAdornment, List, ListItem, CircularProgress, Typography, Box } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import axiosInstance from '@/lib/axios';
-import { useRouter } from 'next/navigation'; // For navigation
+import { useRouter } from 'next/navigation';
 
 function Search() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -17,14 +17,14 @@ function Search() {
         if (searchTerm.trim() === "") {
             setSearchResults([]);
             setNoResults(false);
-            setShowDropdown(false); // Hide dropdown if no search term
+            setShowDropdown(false);
             return;
         }
 
         const fetchResults = async () => {
             setLoading(true);
             setNoResults(false);
-            setShowDropdown(true); // Show dropdown when searching
+            setShowDropdown(true);
             try {
                 const response = await axiosInstance.get(`/api/articles/search/`, {
                     params: { q: searchTerm }
@@ -32,22 +32,24 @@ function Search() {
                 const results = response.data.results;
                 if (results.length > 0) {
                     setSearchResults(results);
+                    setNoResults(false);
                 } else {
+                    setSearchResults([]);    
                     setNoResults(true); 
                 }
             } catch (error) {
                 console.error("Error fetching search results:", error);
+                setSearchResults([]);
+                setNoResults(true);
             }
             setLoading(false);
         };
 
-        // Debounce API request to avoid excessive calls
         const debounceTimeout = setTimeout(fetchResults, 300);
         return () => clearTimeout(debounceTimeout);
 
     }, [searchTerm]);
 
-    // Close dropdown when clicking outside of the search bar
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -61,11 +63,10 @@ function Search() {
         };
     }, [searchRef]);
 
-    // Clear search term when navigating to article detail
     const handleResultClick = (id) => {
-        setSearchTerm(""); // Clear search term
-        setShowDropdown(false); // Hide dropdown
-        router.push(`/readers/articles/${id}`); // Navigate to the article details page
+        setSearchTerm("");
+        setShowDropdown(false);
+        router.push(`/readers/articles/${id}`);
     };
 
     const handleInputChange = (event) => {
@@ -78,7 +79,7 @@ function Search() {
                 <OutlinedInput
                     size="small"
                     id="search"
-                    placeholder="Search…"
+                    placeholder="Search articles and contracts"
                     value={searchTerm}
                     onChange={handleInputChange}
                     sx={{ flexGrow: 1 }}

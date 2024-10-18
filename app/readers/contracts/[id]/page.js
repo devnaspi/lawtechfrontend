@@ -1,21 +1,40 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Box, Typography, TextField, Button } from '@mui/material';
+import { Container, Grid, Box, Typography, TextField, Button, CircularProgress, Alert } from '@mui/material';
+import axiosInstance from '@/lib/axios';
 
-const ContractDetail = ({ contractId }) => {
-    const [formFields, setFormFields] = useState([]);
+const ContractDetail = ({ params }) => {
+    const [contract, setContract] = useState(null);
     const [formData, setFormData] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [validationError, setValidationError] = useState(null);
+    const [downloadUrl, setDownloadUrl] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
+    const contractId = params.id;
 
     useEffect(() => {
-        // Fetch required fields for the contract from the backend
-        const fetchContractFields = async () => {
-            const response = await fetch(`/api/contracts/${contractId}`);
-            const data = await response.json();
-            setFormFields(data.fields); // Expected to be [{ name: 'companyName', label: 'Company Name', type: 'text', required: true }, ...]
+        const fetchContractDetails = async () => {
+            try {
+                const response = await axiosInstance.get(`/api/contracts/${contractId}`);
+                const data = response.data;
+                setContract(data);
+
+                const initialFormData = {};
+                data.fields.forEach(field => {
+                    initialFormData[field.field_name] = '';
+                });
+                setFormData(initialFormData);
+            } catch (err) {
+                setError('Error fetching contract details');
+                console.error('Error fetching contract details:', err);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchContractFields();
+
+        fetchContractDetails();
     }, [contractId]);
 
     const handleInputChange = (e) => {
@@ -27,17 +46,44 @@ const ContractDetail = ({ contractId }) => {
     };
 
     const handleSave = async () => {
-        // Send the filled form data to the backend to generate a preview
-        const response = await fetch('/api/contracts/preview', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ contractId, formData }),
-        });
-        const result = await response.json();
-        setPreviewUrl(result.previewUrl);
+        const isFormValid = Object.keys(formData).every(key => formData[key].trim() !== '');
+
+        if (!isFormValid) {
+            setValidationError('Please fill in all required fields before generating the preview.');
+            return;
+        }
+
+        setValidationError(null);
+
+        try {
+            const response = await axiosInstance.post(`/api/contracts/${contractId}/generate`, {
+                field_values: formData
+            });
+
+            console.log('response', response)
+            setDownloadUrl(response.data.download_url);
+            setPreviewUrl(response.data.preview_url);
+        } catch (err) {
+            setError('Error generating contract.');
+            console.error('Error generating contract:', err);
+        }
     };
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+                <Typography variant="h6" color="error">{error}</Typography>
+            </Box>
+        );
+    }
 
     return (
         <Container maxWidth="lg" sx={{ mt: 20, mb: 4, minHeight: '80vh' }}>
@@ -47,26 +93,31 @@ const ContractDetail = ({ contractId }) => {
                     <Typography variant="h5" gutterBottom>
                         Fill Contract Details
                     </Typography>
+                    {validationError && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {validationError}
+                        </Alert>
+                    )}
                     <Box component="form">
-                        {formFields.map((field) => (
+                        {contract?.fields.map((field) => (
                             <TextField
-                                key={field.name}
-                                label={field.label}
-                                name={field.name}
-                                type={field.type}
-                                required={field.required}
+                                key={field.field_name}
+                                label={field.field_name.replace('_', ' ')}
+                                name={field.field_name}
+                                type={field.field_type}
                                 fullWidth
                                 margin="normal"
+                                required
+                                value={formData[field.field_name] || ''}
                                 onChange={handleInputChange}
                             />
                         ))}
                         <Button variant="contained" onClick={handleSave} sx={{ mt: 2 }}>
-                            Save
+                            Generate Contract
                         </Button>
                     </Box>
                 </Grid>
 
-                {/* Preview Section */}
                 <Grid item xs={12} md={6}>
                     <Typography variant="h5" gutterBottom>
                         Contract Preview
@@ -74,16 +125,21 @@ const ContractDetail = ({ contractId }) => {
                     {previewUrl ? (
                         <Box
                             component="iframe"
-                            src={previewUrl}
-                            sx={{ width: '100%', height: '500px', border: 'none' }}
+                            src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`}
+                            sx={{
+                                width: '100%',
+                                height: '500px',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                            }}
                         />
                     ) : (
                         <Typography variant="body2" color="textSecondary">
                             Fill the form and click "Save" to see a preview.
                         </Typography>
                     )}
-                    {previewUrl && (
-                        <Button variant="outlined" sx={{ mt: 2 }} href={previewUrl} download>
+                    {downloadUrl && (
+                        <Button variant="outlined" sx={{ mt: 2 }} href={downloadUrl} download>
                             Download Contract
                         </Button>
                     )}

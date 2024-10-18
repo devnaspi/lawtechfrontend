@@ -1,33 +1,82 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Container, Box, TextField, Button, Typography, Autocomplete, Chip, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, Box, TextField, Button, Typography, Autocomplete, Chip, CircularProgress, Grid } from '@mui/material';
 import { InsertPhoto as InsertPhotoIcon } from '@mui/icons-material';
-import TextEditor from '../../components/TextEditor'; // Import the reusable TextEditor component
+import TextEditor from '../../components/TextEditor'; 
+import axiosInstance from '@/lib/axios';
+import { useSnackbar } from 'notistack';
 
 const CreateArticle = () => {
   const [articleData, setArticleData] = useState({
     title: '',
     content: '',
     tags: [],
-    coverPhoto: null, // State to store the cover photo
+    categories: [],
+    regions: [],
+    coverPhoto: null,
   });
+  
+  const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableRegions, setAvailableRegions] = useState([]);
 
-  // Existing tags that are available for selection
-  const existingTags = ['Legal', 'Finance', 'Health', 'Education', 'Technology'];
-
-  const handleSaveArticle = (noteDetails, attachments) => {
-    // Update article data with content from TextEditor
-    const updatedArticleData = {
-      ...articleData,
-      content: noteDetails.html, // Use the HTML content from the editor
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const tagsResponse = await axiosInstance.get('/api/tags');
+        const categoriesResponse = await axiosInstance.get('/api/categories/categories');
+        const regionsResponse = await axiosInstance.get('/api/categories/regions');
+        
+        setAvailableTags(tagsResponse.data.results);
+        setAvailableCategories(categoriesResponse.data.results);
+        setAvailableRegions(regionsResponse.data.results);
+      } catch (error) {
+        console.error('Failed to fetch options:', error);
+        enqueueSnackbar('Failed to load options. Please try again.', { variant: 'error' });
+      } finally {
+        setLoadingOptions(false);
+      }
     };
 
-    console.log('Article saved', updatedArticleData);
-    console.log('Attachments', attachments);
+    fetchOptions();
+  }, []);
 
-    // Logic to save or update the article
-    // e.g., make an API call to save the article
+  const handleSaveArticle = async (noteDetails, attachments) => {
+    const updatedArticleData = {
+        ...articleData,
+        content: noteDetails.html,
+    };
+
+    const formData = new FormData();
+    formData.append('title', updatedArticleData.title);
+    formData.append('content', updatedArticleData.content);
+    
+    updatedArticleData.tags.forEach(tag => formData.append('tags[]', tag));
+    updatedArticleData.categories.forEach(category => formData.append('categories[]', category));
+    updatedArticleData.regions.forEach(region => formData.append('regions[]', region));
+
+    if (updatedArticleData.coverPhoto) {
+      formData.append('cover_picture', updatedArticleData.coverPhoto);
+    }
+
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post('/api/articles/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      enqueueSnackbar('Article created successfully!', { variant: 'success' });
+      console.log('Article saved successfully:', response.data);
+    } catch (error) {
+      console.error('Failed to create article:', error);
+      enqueueSnackbar('Failed to create article. Please try again.', { variant: 'error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCoverPhotoChange = (event) => {
@@ -37,6 +86,14 @@ const CreateArticle = () => {
     }
   };
 
+  if (loadingOptions) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Title */}
@@ -44,7 +101,6 @@ const CreateArticle = () => {
         {articleData.id ? 'Edit Article' : 'Create Article'}
       </Typography>
 
-      {/* Article Form */}
       <TextField
         label="Title"
         variant="outlined"
@@ -54,7 +110,6 @@ const CreateArticle = () => {
         sx={{ mb: 4 }}
       />
 
-      {/* Cover Photo Upload */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
         <Button variant="outlined" component="label" startIcon={<InsertPhotoIcon />}>
           Upload Cover Photo
@@ -66,35 +121,78 @@ const CreateArticle = () => {
           </Typography>
         )}
       </Box>
-        
 
-        {/* Tags Input with Autocomplete for Multi-select and Adding New Tags */}
-      <Autocomplete
-        multiple
-        freeSolo
-        options={existingTags} // Options for selection
-        value={articleData.tags}
-        onChange={(event, newValue) => setArticleData({ ...articleData, tags: newValue })}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-              key={option}
-            />
-          ))
-        }
-        renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
-        sx={{ mt: 4, mb: 4 }}
-      />
-      
-      {/* Integrating TextEditor Component */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4}>
+          <Autocomplete
+            multiple
+            freeSolo
+            options={availableTags.map((tag) => tag.name)}
+            value={articleData.tags}
+            onChange={(event, newValue) => setArticleData({ ...articleData, tags: newValue })}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  {...getTagProps({ index })}
+                  key={option}
+                />
+              ))
+            }
+            renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
+            sx={{ mt: 4, mb: 4 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Autocomplete
+            multiple
+            options={availableCategories.map((category) => category.name)}
+            value={articleData.categories}
+            onChange={(event, newValue) => setArticleData({ ...articleData, categories: newValue })}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  {...getTagProps({ index })}
+                  key={option}
+                />
+              ))
+            }
+            renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
+            sx={{ mt: 4, mb: 4 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Autocomplete
+            multiple
+            options={availableRegions.map((region) => region.name)}
+            value={articleData.regions}
+            onChange={(event, newValue) => setArticleData({ ...articleData, regions: newValue })}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  {...getTagProps({ index })}
+                  key={option}
+                />
+              ))
+            }
+            renderInput={(params) => <TextField {...params} label="Regions" variant="outlined" />}
+            sx={{ mt: 4, mb: 4 }}
+          />
+        </Grid>
+      </Grid>
+
       <TextEditor
-        cta="Save Article" // Call-to-action button text
-        onCtaClick={handleSaveArticle} // Handler function for saving the article
+        cta={loading ? 'Saving...' : 'Save Article'}
+        onCtaClick={handleSaveArticle}
+        disabled={loading}
       />
-
     </Container>
   );
 };

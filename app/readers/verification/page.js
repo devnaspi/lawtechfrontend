@@ -7,14 +7,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Container, Dialog } from '@mui/material';
 
 const Verification = () => {
-    const [verificationStatus, setVerificationStatus] = useState('loading'); // 'loading', 'success', or 'failed'
-    const [openModal, setOpenModal] = useState(false); // Modal open state
+    const [verificationStatus, setVerificationStatus] = useState('loading');
+    const [openModal, setOpenModal] = useState(false);
   
     useEffect(() => {
-      // Function to query the backend to verify the account
       const verifyAccount = async () => {
         try {
-          // Replace with your actual backend endpoint and logic
           const response = await fetch('/api/verify-account', {
             method: 'GET',
             headers: {
@@ -26,15 +24,15 @@ const Verification = () => {
   
           if (response.ok && data.verified) {
             setVerificationStatus('success');
-            setOpenModal(true); // Open the modal on success
+            setOpenModal(true); 
           } else {
             setVerificationStatus('failed');
-            setOpenModal(true); // Open the modal on failure
+            setOpenModal(true);
           }
         } catch (error) {
           console.error('Error verifying account:', error);
           setVerificationStatus('failed');
-          setOpenModal(true); // Open the modal on error
+          setOpenModal(true);
         }
       };
   

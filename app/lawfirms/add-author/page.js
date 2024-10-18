@@ -1,22 +1,73 @@
-// app/lawfirms/add-author.js
 'use client';
 
-import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Autocomplete } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, TextField, Button, Typography, Autocomplete, CircularProgress } from '@mui/material';
+import axiosInstance from '@/lib/axios';
+import { useSnackbar } from 'notistack';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+
 
 const AddAuthor = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [authorData, setAuthorData] = useState({
-    name: '',
+    username: '',
     email: '',
+    password: '',
     specialties: [],
   });
+  const [specialties, setSpecialties] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fetchingTags, setFetchingTags] = useState(true);
+  const { handleApiError } = useApiErrorHandler();
 
-  const specialties = ['Criminal Law', 'Civil Rights', 'Contract Law', 'Family Law', 'Technology Law']; // Example specialties
 
-  const handleSaveAuthor = () => {
-    console.log('Author data:', authorData);
-    // Add logic to save author data to backend
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axiosInstance.get('/api/tags/');
+        setSpecialties(response.data.results.map(tag => tag.name));
+      } catch (error) {         
+        handleApiError(error);
+      } finally {
+        setFetchingTags(false);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
+  const handleSaveAuthor = async () => {
+    setLoading(true);
+
+    try {
+      await axiosInstance.post('/api/lawfirms/authors/register/', {
+        username: authorData.username,
+        email: authorData.email,
+        password: authorData.password,
+        tags: authorData.specialties,
+      });
+
+      enqueueSnackbar('Author added successfully!', { variant: 'success' });
+      setAuthorData({
+        username: '',
+        email: '',
+        password: '',
+        specialties: [],
+      });
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (fetchingTags) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -25,11 +76,11 @@ const AddAuthor = () => {
       </Typography>
 
       <TextField
-        label="Name"
+        label="Username"
         variant="outlined"
         fullWidth
-        value={authorData.name}
-        onChange={(e) => setAuthorData({ ...authorData, name: e.target.value })}
+        value={authorData.username}
+        onChange={(e) => setAuthorData({ ...authorData, username: e.target.value })}
         sx={{ mb: 3 }}
       />
 
@@ -42,8 +93,19 @@ const AddAuthor = () => {
         sx={{ mb: 3 }}
       />
 
+      <TextField
+        label="Password"
+        variant="outlined"
+        type="password"
+        fullWidth
+        value={authorData.password}
+        onChange={(e) => setAuthorData({ ...authorData, password: e.target.value })}
+        sx={{ mb: 3 }}
+      />
+
       <Autocomplete
         multiple
+        freeSolo
         options={specialties}
         value={authorData.specialties}
         onChange={(event, newValue) => setAuthorData({ ...authorData, specialties: newValue })}
@@ -51,8 +113,12 @@ const AddAuthor = () => {
         sx={{ mb: 3 }}
       />
 
-      <Button variant="contained" onClick={handleSaveAuthor}>
-        Save Author
+      <Button
+        variant="contained"
+        onClick={handleSaveAuthor}
+        disabled={loading}
+      >
+        {loading ? 'Saving...' : 'Save Author'}
       </Button>
     </Container>
   );

@@ -2,10 +2,11 @@ import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import { Box, Typography } from '@mui/material';
-import { formatDate } from '@/app/utils/formatDate';
+import { formatDate } from '@/utils/formatDate';
 
 
 function Author({ authors, created_at }) {
+    console.log("authors is ", authors)
     return (
     <Box
         sx={{
@@ -24,14 +25,14 @@ function Author({ authors, created_at }) {
             {authors.map((author, index) => (
             <Avatar
                 key={index}
-                alt={author.name}
+                alt={author.user.name}
                 src={author.avatar}
                 sx={{ width: 24, height: 24 }}
             />
             ))}
         </AvatarGroup>
         <Typography variant="caption">
-            {authors.map((author) => author.name).join(', ')}
+            {authors.map((author) => author.user.name).join(', ')}
         </Typography>
         </Box>
         <Typography variant="caption">{ formatDate(created_at) }</Typography>

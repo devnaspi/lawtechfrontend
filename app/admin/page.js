@@ -3,14 +3,12 @@
 import React from 'react';
 import { Container, Box, Typography, Grid, Card, CardContent, Button, Avatar } from '@mui/material';
 
-// Sample data for metrics
 const metrics = {
     shares: 120,
     reads: 450,
     bookmarks: 80,
 };
 
-// Recent activities sample data
 const recentArticles = [
     { id: 1, title: 'Understanding Criminal Law', lastEdited: '2024-09-02' },
     { id: 2, title: 'How to Build Scalable Applications in 2024', lastEdited: '2024-09-01' },
@@ -20,12 +18,10 @@ const recentArticles = [
 const Dashboard = () => {
     return (
         <Container maxWidth="lg" sx={{ mt: 20, mb: 4 }}>
-            {/* Title */}
             <Typography variant="h4" gutterBottom>
                 Author Dashboard
             </Typography>
 
-            {/* Metrics Cards */}
             <Grid container spacing={4}>
                 {Object.entries(metrics).map(([key, value]) => (
                     <Grid item xs={12} sm={4} key={key}>
@@ -41,7 +37,6 @@ const Dashboard = () => {
                 ))}
             </Grid>
 
-            {/* Quick Actions */}
             <Box sx={{ mt: 4, mb: 4 }}>
                 <Button variant="contained" sx={{ mr: 2 }} onClick={() => {/* Navigate to create article */}}>
                     Create Article

@@ -8,8 +8,8 @@ const VerificationFailed = ({ handleClose }) => {
   const router = useRouter();
 
   const handleRetryClick = () => {
-    handleClose(); // Close the modal
-    router.push('/readers/sign-up'); // Navigate to the signup page for retry
+    handleClose();
+    router.push('/readers/sign-up');
   };
 
   return (

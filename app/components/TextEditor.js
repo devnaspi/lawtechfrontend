@@ -1,5 +1,3 @@
-// components/TextEditor.js
-
 import React, { useState, useEffect, useRef } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -21,7 +19,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 
-const TextEditor = ({ cta, onCtaClick }) => {
+const TextEditor = ({ cta, onCtaClick, initialContent = '' }) => {
   const [attachments, setAttachments] = useState([]);
   const fileInputRef = useRef();
 
@@ -43,9 +41,14 @@ const TextEditor = ({ cta, onCtaClick }) => {
       attributes: {
         class: 'custom-editor',
       },
-      transformPastedText: (text) => text.toUpperCase(),
     },
   });
+
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent]);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -131,7 +134,10 @@ const TextEditor = ({ cta, onCtaClick }) => {
         </Box>
 
         {/* Editor Content */}
-        <Box onClick={() => editor?.view?.focus()} sx={{ minHeight: '50vh', border: 'solid 0.5px #40A758', borderRadius: 1, p: 2, mb: 2 }}>
+        <Box
+          onClick={() => editor?.view?.focus()}
+          sx={{ minHeight: '50vh', border: 'solid 0.5px #40A758', borderRadius: 1, p: 2, mb: 2 }}
+        >
           <EditorContent editor={editor} />
         </Box>
 

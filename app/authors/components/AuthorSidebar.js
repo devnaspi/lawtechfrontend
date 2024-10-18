@@ -1,58 +1,97 @@
 'use client';
 
-import React from 'react';
-import { List, ListItem, ListItemText, Divider } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Tabs, Tab, Button, Box } from '@mui/material';
 import { useRouter, usePathname } from 'next/navigation';
+import axiosInstance from '@/lib/axios';
+import { useSnackbar } from 'notistack';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+import { useAuth } from '@/context/AuthContext';
 
 const AuthorSidebar = () => {
   const router = useRouter();
-  const pathname = usePathname(); // Get the current path
+  const pathname = usePathname();
+  const { enqueueSnackbar } = useSnackbar();
+  const { handleApiError } = useApiErrorHandler();
+  const { logout } = useAuth();
 
-  const handleNavigation = (path) => {
-    router.push(path);
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const routes = [
+    '/authors/dashboard', 
+    '/authors/create-article', 
+    '/authors/manage-articles', 
+    '/authors/profile'
+  ];
+
+  useEffect(() => {
+    const currentRoute = routes.indexOf(pathname);
+    if (currentRoute !== -1) {
+      setSelectedTab(currentRoute);
+    }
+  }, [pathname]);
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+    router.push(routes[newValue]);
   };
 
-  // Function to check if the current path matches the button's path
-  const isActive = (path) => pathname === path;
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post('/api/users/auth/logout');
+      logout();
+      enqueueSnackbar('Logout successful!', { variant: 'success' });
+      router.push('/authors/signin');
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
 
   return (
-    <div style={{ width: '250px', backgroundColor: '#f5f5f5', padding: '20px' }}>
-      <List component="nav">
-        <ListItem
-          className='pointer'
-          button
-          onClick={() => handleNavigation('/authors/dashboard')}
-          selected={isActive('/authors/dashboard')} // Highlight if the current path matches
-        >
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        <Divider />
-        <ListItem
-          className='pointer'
-          button
-          onClick={() => handleNavigation('/authors/create-article')}
-          selected={isActive('/authors/create-article')}
-        >
-          <ListItemText primary="Create Article" />
-        </ListItem>
-        <ListItem
-          className='pointer'
-          button
-          onClick={() => handleNavigation('/authors/manage-articles')}
-          selected={isActive('/authors/manage-articles')}
-        >
-          <ListItemText primary="Manage Articles" />
-        </ListItem>
-        <ListItem
-          className='pointer'
-          button
-          onClick={() => handleNavigation('/authors/profile')}
-          selected={isActive('/authors/profile')}
-        >
-          <ListItemText primary="Manage Profile" />
-        </ListItem>
-      </List>
-    </div>
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100vh', 
+        backgroundColor: '#f5f5f5', 
+        borderColor: 'divider', 
+        pt: 3,
+      }}
+    >
+      <Tabs
+        orientation="vertical"
+        value={selectedTab}
+        onChange={handleTabChange}
+        sx={{
+          width: '100%',
+          flexGrow: 1,
+          '& .MuiTab-root': {
+            textAlign: 'left',
+            color: 'info.main',
+          },
+          '& .Mui-selected': {
+            color: 'info.main',
+            borderLeft: '4px solid',
+            borderColor: 'info.main',
+          },
+        }}
+      >
+        <Tab label="Dashboard" />
+        <Tab label="Create Article" />
+        <Tab label="Manage Articles" />
+        <Tab label="Manage Profile" />
+      </Tabs>
+
+      <Button
+        color="error"
+        variant="text"
+        size="small"
+        sx={{ m: 2 }}
+        onClick={handleLogout}
+      >
+        Logout
+      </Button>
+    </Box>
   );
 };
 

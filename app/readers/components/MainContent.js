@@ -11,8 +11,10 @@ import Author from './Author';
 import {useRouter} from 'next/navigation';
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
+import StyledTypography from './StyledTypography';
 
-    const SyledCard = styled(Card)(({ theme }) => ({
+
+const SyledCard = styled(Card)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: 0,
@@ -27,27 +29,18 @@ import axiosInstance from '@/lib/axios';
     outlineColor: 'hsla(210, 98%, 48%, 0.5)',
     outlineOffset: '2px',
     },
-    }));
+}));
 
-    const SyledCardContent = styled(CardContent)({
+const SyledCardContent = styled(CardContent)({
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
-    padding: 16,
+    gap: 2,
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingTop: 10,
+    paddingBottom: 5,
     flexGrow: 1,
-    '&:last-child': {
-    paddingBottom: 16,
-    },
-    });
-
-    const StyledTypography = styled(Typography)({
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical',
-    WebkitLineClamp: 2,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    });
-
+});
 export default function MainContent() {
     const router = useRouter()
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
@@ -103,16 +96,12 @@ export default function MainContent() {
                                 borderColor: 'divider',
                                 }}
                             />
-                            <SyledCardContent>
-                                <Typography gutterBottom variant="caption" component="div">
-                                {article.area}
-                                </Typography>
+                            <SyledCardContent>              
                                 <Typography gutterBottom variant="h6" component="div">
                                 {article.title}
                                 </Typography>
-                                <StyledTypography variant="body2" color="text.secondary" gutterBottom>
-                                {article.description}
-                                </StyledTypography>
+                                <StyledTypography variant="body2" color="text.secondary" gutterBottom
+                                dangerouslySetInnerHTML={{ __html: article.content }} />
                             </SyledCardContent>
                             <Author authors={[article.author]} created_at={article.created_at} />
                             </SyledCard>

@@ -7,15 +7,15 @@ import { useRouter } from 'next/navigation';
 
 const Custom404 = () => {
 const router = useRouter();
-const [openDialog, setOpenDialog] = useState(true); // Initialize dialog open state
+const [openDialog, setOpenDialog] = useState(true);
 
 const handleCloseDialog = () => {
 setOpenDialog(false);
-router.push('/readers/'); // Navigate back to the home page
+router.push('/readers/');
 };
 
 useEffect(() => {
-setOpenDialog(true); // Open the dialog when the component mounts
+setOpenDialog(true);
 }, []);
 
 return (
@@ -33,7 +33,7 @@ return (
     <Dialog
     open={openDialog}
     onClose={handleCloseDialog}
-    maxWidth="sm" // Adjust the maximum width of the dialog
+    maxWidth="sm"
     fullWidth
     PaperProps={{
         sx: {

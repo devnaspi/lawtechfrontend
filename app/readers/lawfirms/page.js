@@ -17,7 +17,6 @@ import {
     MenuItem,
 } from '@mui/material';
 
-// Sample data for law firms
 const lawFirmsData = [
     {
         id: 1,
@@ -34,7 +33,6 @@ const lawFirmsData = [
         name: 'Miller Law Offices',
         specialties: ['Civil Rights Law', 'Technology Law'],
     },
-    // Add more law firm data as needed
 ];
 
 const LawFirmsList = () => {
@@ -46,15 +44,9 @@ const LawFirmsList = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // Fetch law firms data from backend API
-        // For now, we're using the sample data above
         const fetchLawFirms = async () => {
-            // Uncomment the lines below to fetch from the backend
-            // const response = await fetch('/api/lawfirms');
-            // const data = await response.json();
-            setLawFirms(lawFirmsData); // Replace with `data` once backend is available
+            setLawFirms(lawFirmsData);
 
-            // Fetch unique tags from specialties
             const uniqueTags = [...new Set(lawFirmsData.flatMap(firm => firm.specialties))];
             setTags(uniqueTags);
         };
@@ -63,7 +55,6 @@ const LawFirmsList = () => {
     }, []);
 
     useEffect(() => {
-        // Filter law firms by search query and selected tag
         const filter = () => {
             let filtered = lawFirms;
 
@@ -124,7 +115,7 @@ const LawFirmsList = () => {
                     <Grid item xs={12} sm={6} md={4} key={firm.id}>
                         <Card
                             sx={{ cursor: 'pointer' }}
-                            onClick={() => router.push(`/readers/lawfirms/${firm.id}`)} // Navigate to law firm detail page
+                            onClick={() => router.push(`/readers/lawfirms/${firm.id}`)} 
                         >
                             <CardContent>
                                 <Typography variant="h6" gutterBottom>

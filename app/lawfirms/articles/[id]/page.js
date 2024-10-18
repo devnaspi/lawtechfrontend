@@ -1,45 +1,45 @@
-// app/lawfirms/view-article.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton, FacebookIcon, TwitterIcon, WhatsappIcon } from 'react-share';
-import { Container, Box, Typography, Grid, Paper, CircularProgress, Stack, CardMedia, CardContent, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import { Container, Box, Typography, Grid, Paper, CircularProgress, Stack, Card, CardMedia, CardContent } from '@mui/material';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-// Sample data for the main article
-const cardData = {
-    cover: 'https://picsum.photos/800/450?random=1',
-    area: 'Administrative Law',
-    title: 'Revolutionizing software development with cutting-edge tools',
-    description: 'Our latest engineering tools are designed to streamline workflows and boost productivity. Discover how these innovations are transforming the software development landscape.',
-    body: 'Our latest engineering tools are designed to streamline workflows and boost productivity. Discover how these innovations are transforming the software development landscape.',
-    authors: [
-        { name: 'Remy Sharp', avatar: '/static/images/avatar/1.jpg' },
-        { name: 'Travis Howard', avatar: '/static/images/avatar/2.jpg' },
-    ],
-    created_at: 'July 14, 2021',
-    region: 'Africa',
-};
-
-// Sample comments data
-const sampleComments = [
-    { text: 'Great article! Very informative.', date: '2024-09-05 14:30' },
-    { text: 'I found this very helpful, thank you!', date: '2024-09-06 10:15' },
-];
+import axiosInstance from '@/lib/axios';
 
 const LawFirmArticleDetails = ({ params }) => {
     const router = useRouter();
-    const { id } = params.id; // Get the article ID from the route
+    const { id } = params;
     const [article, setArticle] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [comments, setComments] = useState(sampleComments); // State to store comments
+    const [similarArticles, setSimilarArticles] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate fetching article data
-        setArticle(cardData);
+        fetchArticle();
+        fetchSimilarArticles();
     }, [id]);
+
+    const fetchArticle = async () => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get(`/api/articles/${id}/`);
+            setArticle(response.data);
+        } catch (error) {
+            console.error('Error fetching article:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchSimilarArticles = async () => {
+        try {
+            const response = await axiosInstance.get(`/api/articles/${id}/read-more/?limit=4`);
+            setSimilarArticles(response.data.results);
+        } catch (error) {
+            console.error('Failed to fetch similar articles:', error);
+        }
+    };
 
     const handleDownloadPDF = () => {
         const input = document.getElementById('article-content');
@@ -83,12 +83,12 @@ const LawFirmArticleDetails = ({ params }) => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container maxWidth="lg" sx={{ mt: 20, mb: 4 }}>
             {/* Cover Photo */}
             <Box
                 component="img"
-                src={article.cover}
-                alt={article.title}
+                src={article.cover_picture || 'https://via.placeholder.com/800x450'}
+                alt="cover img"
                 sx={{
                     width: '100%',
                     maxHeight: '350px',
@@ -100,7 +100,6 @@ const LawFirmArticleDetails = ({ params }) => {
 
             {/* Share and Download Buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                {/* Share Buttons */}
                 <Stack direction="row" spacing={2}>
                     <FacebookShareButton url={window.location.href} quote={article.title}>
                         <FacebookIcon size={32} round />
@@ -113,10 +112,11 @@ const LawFirmArticleDetails = ({ params }) => {
                     </WhatsappShareButton>
                 </Stack>
 
-                {/* Download Button */}
-                <IconButton onClick={handleDownloadPDF}>
-                    <Typography variant="body2">Download as PDF</Typography>
-                </IconButton>
+                <Stack direction="row" spacing={2}>
+                    <Typography variant="body2" onClick={handleDownloadPDF} style={{ cursor: 'pointer' }}>
+                        Download as PDF
+                    </Typography>
+                </Stack>
             </Box>
 
             {/* Article Title */}
@@ -126,41 +126,70 @@ const LawFirmArticleDetails = ({ params }) => {
 
             {/* Main Content */}
             <div id="article-content">
-                <Grid container spacing={2} sx={{ mb: 4 }}>
-                    {/* ... Existing content ... */}
-                </Grid>
-
-                {/* Article Body */}
                 <Paper sx={{ p: 4 }}>
-                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                        {article.body}
-                    </Typography>
+                    <Typography 
+                        variant="body1" 
+                        sx={{ lineHeight: 1.8 }}
+                        dangerouslySetInnerHTML={{ __html: article.content }}
+                    />
                 </Paper>
             </div>
 
-            {/* Comments Section */}
-            <Box sx={{ mt: 6 }}>
+            {/* Read More Section */}
+            <Box sx={{ mt: 8 }}>
                 <Typography variant="h5" gutterBottom>
-                    Comments
+                    Read More
                 </Typography>
-
-                {/* Display Comments */}
-                {comments.length > 0 ? (
-                    <List>
-                        {comments.map((comment, index) => (
-                            <ListItem key={index} alignItems="flex-start">
-                                <ListItemText
-                                    primary={comment.text}
-                                    secondary={`Posted on ${comment.date}`}
+                <Grid container spacing={4}>
+                    {similarArticles.map((article) => (
+                        <Grid item xs={6} sm={4} md={3} key={article.id}>
+                            <Card
+                                sx={{
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    height: '100%',
+                                }}
+                                onClick={() => router.push(`/lawfirms/articles/${article.id}`)}
+                            >
+                                <CardMedia
+                                    component="img"
+                                    image={article.cover_picture}
+                                    alt={article.title}
+                                    sx={{
+                                        height: 140,
+                                        objectFit: 'cover',
+                                    }}
                                 />
-                            </ListItem>
-                        ))}
-                    </List>
-                ) : (
-                    <Typography variant="body2" color="textSecondary">
-                        No comments yet.
-                    </Typography>
-                )}
+                                <CardContent
+                                    sx={{
+                                        flexGrow: 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        {article.title}
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                        sx={{
+                                            display: '-webkit-box',
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            WebkitLineClamp: 2,
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: article.content }}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
             </Box>
         </Container>
     );

@@ -1,37 +1,64 @@
-// app/lawfirms/edit-contract.js
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Container, TextField, Button, Typography, Box, IconButton } from '@mui/material';
-import TextEditor from '../../../components/TextEditor';
+import React, { useEffect, useState } from 'react';
+import { Container, TextField, Button, Typography, Box, IconButton, CircularProgress } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import TextEditor from '@/app/components/TextEditor';
+import axiosInstance from '@/lib/axios';
+import { useRouter, useParams } from 'next/navigation';
+import { useSnackbar } from 'notistack';
 
-const EditContract = ({ initialContractData }) => {
-  // Use state to manage contract data
+const EditContractPage = () => {
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+  const { id } = useParams();
   const [contractData, setContractData] = useState({
     name: '',
     fields: [{ fieldName: '', fieldType: 'text', options: [] }],
     body: '',
   });
+  const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] = useState(false);
 
-  // Load the initial contract data when the component mounts
   useEffect(() => {
-    if (initialContractData) {
-      setContractData(initialContractData);
-    }
-  }, [initialContractData]);
+    const fetchContract = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/contracts/${id}`);
+        const data = response.data;
+        setContractData({
+          name: data.name,
+          fields: data.fields.map((field) => ({
+            fieldName: field.field_name,
+            fieldType: field.field_type,
+            options: field.options || [],
+          })),
+          body: data.body,
+        });
+      } catch (error) {
+        console.error('Failed to fetch contract:', error);
+        enqueueSnackbar('Failed to fetch contract details.', { variant: 'error' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContract();
+  }, [id, enqueueSnackbar]);
 
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...contractData.fields];
     updatedFields[index][field] = value;
     if (field === 'fieldType' && value !== 'options') {
-      updatedFields[index].options = []; // Clear options if the field type is changed to something other than 'options'
+      updatedFields[index].options = [];
     }
     setContractData({ ...contractData, fields: updatedFields });
   };
 
   const handleAddField = () => {
-    setContractData({ ...contractData, fields: [...contractData.fields, { fieldName: '', fieldType: 'text', options: [] }] });
+    setContractData({
+      ...contractData,
+      fields: [...contractData.fields, { fieldName: '', fieldType: 'text', options: [] }],
+    });
   };
 
   const handleAddOption = (fieldIndex) => {
@@ -52,30 +79,51 @@ const EditContract = ({ initialContractData }) => {
     setContractData({ ...contractData, fields: updatedFields });
   };
 
-  const handleSaveContract = (noteDetails) => {
+  const handleSaveContract = async (noteDetails) => {
+    setSaveLoading(true);
+
     const updatedContractData = {
-      ...contractData,
-      body: noteDetails.html, // Use the HTML content from the editor
+      name: contractData.name,
+      body: noteDetails.html,
+      fields: contractData.fields.map((field) => ({
+        field_name: field.fieldName,
+        field_type: field.fieldType,
+        options: field.options,
+      })),
+      tags: ['law', 'criminal'],
     };
 
-    console.log('Updated contract data:', updatedContractData);
-    // Add logic to update the contract data in the backend
+    try {
+      await axiosInstance.put(`/api/contracts/${id}`, updatedContractData);
+      enqueueSnackbar('Contract updated successfully!', { variant: 'success' });
+      router.push('/admin/contracts');
+    } catch (error) {
+      console.error('Failed to update contract:', error);
+      enqueueSnackbar('Failed to update contract.', { variant: 'error' });
+    } finally {
+      setSaveLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Title */}
       <Typography variant="h4" gutterBottom>
         Edit Contract
       </Typography>
 
-      {/* Explanation */}
       <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-        Use the text editor below to edit the contract body. You can insert placeholders by wrapping field names in double curly braces like
+        Use the text editor below to modify the contract body. Insert placeholders by wrapping field names in double curly braces like 
         <code> {'{{field_name}}'} </code>. These placeholders will be dynamically replaced with the values provided by the client.
       </Typography>
 
-      {/* Contract Name Input */}
       <TextField
         label="Contract Name"
         variant="outlined"
@@ -85,7 +133,6 @@ const EditContract = ({ initialContractData }) => {
         sx={{ mb: 3 }}
       />
 
-      {/* Dynamic Fields for Contract */}
       {contractData.fields.map((field, index) => (
         <Box key={index} sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -142,20 +189,20 @@ const EditContract = ({ initialContractData }) => {
         </Box>
       ))}
 
-      {/* Button to Add Field */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mb: 3 }}>
         <Button variant="outlined" onClick={handleAddField}>
           Add Field
         </Button>
       </Box>
 
-      {/* Integrating TextEditor Component */}
       <TextEditor
-        cta="Save Contract" // Change CTA button text
-        onCtaClick={handleSaveContract} // Use this handler to save the contract
+        cta="Save Contract"
+        onCtaClick={handleSaveContract} 
+        isLoading={saveLoading}
+        initialContent={contractData.body} 
       />
     </Container>
   );
 };
 
-export default EditContract;
+export default EditContractPage;

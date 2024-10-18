@@ -1,25 +1,35 @@
 'use client';
 
-import React from 'react';
-import { Container, Box, Typography, Grid, Card, CardContent, Button, Avatar } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Container, Box, Typography, Grid, Card, CardContent, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
-
-// Sample data for metrics
-const metrics = {
-    shares: 120,
-    reads: 450,
-    bookmarks: 80,
-};
-
-// Recent activities sample data
-const recentArticles = [
-    { id: 1, title: 'Understanding Criminal Law', lastEdited: '2024-09-02' },
-    { id: 2, title: 'How to Build Scalable Applications in 2024', lastEdited: '2024-09-01' },
-    { id: 3, title: 'Effective Legal Writing', lastEdited: '2024-08-30' },
-];
+import axiosInstance from '@/lib/axios';
 
 const Dashboard = () => {
-    const router = useRouter()
+    const router = useRouter();
+    const [metrics, setMetrics] = useState({
+        total_articles: 0,
+        total_reads: 0,
+        total_bookmarks: 0,
+        total_shares: 0,
+        recent_articles: [],
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            try {
+                const response = await axiosInstance.get('/api/authors/summary');
+                setMetrics(response.data);
+            } catch (error) {
+                console.error('Failed to fetch metrics:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMetrics();
+    }, []);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -30,18 +40,46 @@ const Dashboard = () => {
 
             {/* Metrics Cards */}
             <Grid container spacing={4}>
-                {Object.entries(metrics).map(([key, value]) => (
-                    <Grid item xs={12} sm={4} key={key}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h5" gutterBottom>
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                                </Typography>
-                                <Typography variant="h3">{value}</Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
+                <Grid item xs={12} sm={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>
+                                Articles
+                            </Typography>
+                            <Typography variant="h3">{metrics.total_articles}</Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>
+                                Reads
+                            </Typography>
+                            <Typography variant="h3">{metrics.total_reads}</Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>
+                                Bookmarks
+                            </Typography>
+                            <Typography variant="h3">{metrics.total_bookmarks}</Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>
+                                Shares
+                            </Typography>
+                            <Typography variant="h3">{metrics.total_shares}</Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
             </Grid>
 
             {/* Quick Actions */}
@@ -59,16 +97,20 @@ const Dashboard = () => {
                 Recent Articles
             </Typography>
             <Box sx={{ mt: 2 }}>
-                {recentArticles.map((article) => (
-                    <Card key={article.id} sx={{ mb: 2 }}>
-                        <CardContent>
-                            <Typography variant="h6">{article.title}</Typography>
-                            <Typography variant="body2" color="textSecondary">
-                                Last edited on {article.lastEdited}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                ))}
+                {metrics.recent_articles.length === 0 ? (
+                    <Typography>No recent articles.</Typography>
+                ) : (
+                    metrics.recent_articles.map((article) => (
+                        <Card key={article.id} sx={{ mb: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6">{article.title}</Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Last edited on {new Date(article.created_at).toLocaleDateString()}
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
             </Box>
         </Container>
     );

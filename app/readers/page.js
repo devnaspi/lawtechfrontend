@@ -1,4 +1,3 @@
-// pages/index.js
 'use client'
 
 import { Box, Container } from '@mui/material';
