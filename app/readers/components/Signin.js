@@ -25,7 +25,7 @@ export default function Signin({ open, handleClose }) {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/api/users/auth/login', {
+            const response = await axiosInstance.post('/api/users/auth/login/', {
                 username,
                 password
             });

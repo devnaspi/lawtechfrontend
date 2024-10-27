@@ -6,7 +6,6 @@ import { formatDate } from '@/utils/formatDate';
 
 
 function Author({ authors, created_at }) {
-    console.log("authors is ", authors)
     return (
     <Box
         sx={{

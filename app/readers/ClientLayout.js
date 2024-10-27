@@ -7,6 +7,8 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
+import OTPVerification from './components/OTPVerification';
+import CompleteRegistration from './components/CompleteRegistration';
 import { useRouter } from 'next/navigation';
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import { usePathname } from 'next/navigation';
@@ -16,6 +18,10 @@ import { useAuth } from '@/context/AuthContext';
 export default function ClientLayout({ children }) {
     const [openSignInModal, setOpenSignInModal] = useState(false);
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
+    const [openOTPModal, setOpenOTPModal] = useState(false);
+    const [openCompleteRegistrationModal, setOpenCompleteRegistrationModal] = useState(false);
+
+    const [email, setEmail] = useState(''); // Email to be passed between steps
     const [showAppBar, setShowAppBar] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
@@ -25,12 +31,18 @@ export default function ClientLayout({ children }) {
         if (pathname === '/readers/login') {
             setOpenSignUpModal(false);
             setOpenSignInModal(true);
+            setOpenOTPModal(false);
+            setOpenCompleteRegistrationModal(false);
         } else if (pathname === '/readers/sign-up') {
             setOpenSignUpModal(true);
             setOpenSignInModal(false);
+            setOpenOTPModal(false);
+            setOpenCompleteRegistrationModal(false);
         } else {
             setOpenSignInModal(false);
             setOpenSignUpModal(false);
+            setOpenOTPModal(false);
+            setOpenCompleteRegistrationModal(false);
         }
 
         setShowAppBar(pathname !== '/readers/profile');
@@ -47,7 +59,21 @@ export default function ClientLayout({ children }) {
     const handleCloseModals = () => {
         setOpenSignInModal(false);
         setOpenSignUpModal(false);
+        setOpenOTPModal(false);
+        setOpenCompleteRegistrationModal(false);
         router.push('/readers/');
+    };
+
+    const handleOTPSuccess = (verifiedEmail) => {
+        setEmail(verifiedEmail);
+        setOpenOTPModal(false);
+        setOpenCompleteRegistrationModal(true);
+    };
+
+    const handleSignupSuccess = (userEmail) => {
+        setEmail(userEmail);
+        setOpenSignUpModal(false);
+        setOpenOTPModal(true);
     };
 
     return (
@@ -62,8 +88,23 @@ export default function ClientLayout({ children }) {
                 <Footer />
 
                 <Signin open={openSignInModal} handleClose={handleCloseModals} />
-                <Signup open={openSignUpModal} handleClose={handleCloseModals} />
-                
+                <Signup 
+                    open={openSignUpModal} 
+                    handleClose={handleCloseModals} 
+                    onOTPSuccess={handleSignupSuccess}
+                />
+                <OTPVerification 
+                    open={openOTPModal} 
+                    handleClose={handleCloseModals} 
+                    email={email}
+                    onVerificationSuccess={handleOTPSuccess}
+                />
+                <CompleteRegistration 
+                    open={openCompleteRegistrationModal} 
+                    handleClose={handleCloseModals} 
+                    email={email}
+                />
+
                 <ProgressBar height="2px" color="green" options={{ showSpinner: false }} shallowRouting />
             </SnackbarProvider>
         </>
