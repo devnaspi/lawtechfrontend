@@ -59,7 +59,7 @@ export default function CompleteRegistration({ open, handleClose, email }) {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post('/api/users/register', {
+            const response = await axios.post('/api/users/register/', {
                 ...formData,
                 email,
                 role: 'client',

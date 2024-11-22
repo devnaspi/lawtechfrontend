@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import axiosInstance from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+
 
 
 export default function Signin({ open, handleClose }) {
@@ -17,8 +19,19 @@ export default function Signin({ open, handleClose }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { login } = useAuth();
+    const { handleApiError } = useApiErrorHandler();
+
 
     const redirectTo = searchParams.get('redirect') || '/readers';
+
+    useEffect(() => {
+        const prefillEmail = sessionStorage.getItem('prefill_email');
+        if (prefillEmail) {    
+            setUsername(prefillEmail);
+            sessionStorage.removeItem('prefill_email');
+        }
+    }, []);
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -34,8 +47,20 @@ export default function Signin({ open, handleClose }) {
             await login(token, 'client');
 
             enqueueSnackbar('Login successful!', { variant: 'success' });
-            handleClose();
+            const pendingSubscriptionEmail = sessionStorage.getItem('pending_subscription_email');
+            if (pendingSubscriptionEmail) {
+                try {
+                    await axiosInstance.post('/api/newsletters/subscribe/', {
+                        email: pendingSubscriptionEmail,
+                    });
+                    enqueueSnackbar('You have been subscribed to the newsletter!', { variant: 'success' });
+                    sessionStorage.removeItem('pending_subscription_email'); 
+                } catch (err) {
+                    handleApiError(err);
+                }
+            }
 
+            handleClose();
             router.push(redirectTo);
         } catch (error) {
             if (error.response && error.response.data) {

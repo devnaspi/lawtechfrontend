@@ -17,7 +17,6 @@ export default function AdminLogin() {
     const searchParams = useSearchParams();
     const { login, auth, setAuth } = useAuth();
     const { handleApiError } = useApiErrorHandler();
-    const { enqueueSnackbar } = useSnackbar();
 
     const redirectTo = searchParams.get('redirect') || '/admin/dashboard';
 
@@ -39,7 +38,7 @@ export default function AdminLogin() {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/api/users/auth/login', {
+            const response = await axiosInstance.post('/api/users/auth/login/', {
                 username,
                 password,
             });

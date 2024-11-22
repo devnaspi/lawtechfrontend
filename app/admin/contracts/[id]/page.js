@@ -51,10 +51,10 @@ const ContractDetailPage = () => {
             {contractData.fields.map((field, index) => (
                 <Box key={index} sx={{ mb: 3 }}>
                     <TextField
-                        label={field.field_name}
+                        label={field.fieldName}
                         variant="outlined"
                         fullWidth
-                        value={field.field_type}
+                        value={field.fieldType}
                         disabled
                     />
                 </Box>

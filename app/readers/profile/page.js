@@ -184,7 +184,7 @@ const EditProfile = () => {
 
     const handleLogout = async () => {
         try {
-            await axiosInstance.post('/api/users/auth/logout');
+            await axiosInstance.post('/api/users/auth/logout/');
 
             logout();
             enqueueSnackbar('Logout successful!', { variant: 'success' });

@@ -41,7 +41,7 @@ export default function AuthorLogin() {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/api/users/auth/login', {
+            const response = await axiosInstance.post('/api/users/auth/login/', {
                 username,
                 password,
             });
@@ -58,7 +58,7 @@ export default function AuthorLogin() {
     };
 
     return (
-        <Container maxWidth="sm">
+        <Container maxWidth="sm" sx={{'backgroundColor': 'white'}}>
             <Box
                 sx={{
                     display: 'flex',
@@ -68,7 +68,7 @@ export default function AuthorLogin() {
                     gap: 2,
                 }}
             >
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" color={'black'} gutterBottom>
                     Login
                 </Typography>
 

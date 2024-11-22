@@ -7,6 +7,7 @@ import axiosInstance from '@/lib/axios';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
 import { useAuth } from '@/context/AuthContext';
 import { useSnackbar } from 'notistack';
+import { useTheme } from '@emotion/react';
 
 
 export default function LawfirmLogin() {
@@ -17,7 +18,7 @@ export default function LawfirmLogin() {
     const searchParams = useSearchParams();
     const { login, auth, setAuth } = useAuth();
     const { handleApiError } = useApiErrorHandler();
-    const { enqueueSnackbar } = useSnackbar();
+    const theme = useTheme()
 
     const redirectTo = searchParams.get('redirect') || '/lawfirms/dashboard';
 
@@ -39,7 +40,7 @@ export default function LawfirmLogin() {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/api/users/auth/login', {
+            const response = await axiosInstance.post('/api/users/auth/login/', {
                 username,
                 password,
             });
@@ -78,6 +79,20 @@ export default function LawfirmLogin() {
                         label="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        sx={{ '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                          },
+                          '& input': {
+                            color: theme.palette.text.primary,
+                        }, }}
                     />
                     <TextField
                         margin="normal"
@@ -87,6 +102,20 @@ export default function LawfirmLogin() {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        sx={{  '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: theme.palette.primary.main,
+                            },
+                          },
+                          '& input': {
+                            color: theme.palette.text.primary,
+                        }, }}
                     />
 
                     <Button

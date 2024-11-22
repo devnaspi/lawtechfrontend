@@ -6,6 +6,8 @@ import { InsertPhoto as InsertPhotoIcon } from '@mui/icons-material';
 import TextEditor from '../../components/TextEditor'; 
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
+import { useTheme } from '@mui/material/styles';
+
 
 const CreateArticle = () => {
   const [articleData, setArticleData] = useState({
@@ -23,6 +25,7 @@ const CreateArticle = () => {
   const [availableTags, setAvailableTags] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableRegions, setAvailableRegions] = useState([]);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -107,7 +110,23 @@ const CreateArticle = () => {
         fullWidth
         value={articleData.title}
         onChange={(e) => setArticleData({ ...articleData, title: e.target.value })}
-        sx={{ mb: 4 }}
+        sx={{
+          mb: 4,
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: theme.palette.primary.main,
+            },
+            '&:hover fieldset': {
+              borderColor: theme.palette.primary.main,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: theme.palette.primary.main,
+            },
+          },
+          '& input': {
+            color: theme.palette.text.primary,
+          },
+        }}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
@@ -141,7 +160,20 @@ const CreateArticle = () => {
               ))
             }
             renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
-            sx={{ mt: 4, mb: 4 }}
+            sx={{ mt: 4, mb: 4, '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+            '& input': {
+              color: theme.palette.text.primary,
+            },}}
           />
         </Grid>
 
@@ -162,7 +194,20 @@ const CreateArticle = () => {
               ))
             }
             renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
-            sx={{ mt: 4, mb: 4 }}
+            sx={{ mt: 4, mb: 4, '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+            '& input': {
+              color: theme.palette.text.primary,
+            }, }}
           />
         </Grid>
 
@@ -183,7 +228,20 @@ const CreateArticle = () => {
               ))
             }
             renderInput={(params) => <TextField {...params} label="Regions" variant="outlined" />}
-            sx={{ mt: 4, mb: 4 }}
+            sx={{ mt: 4, mb: 4, '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&:hover fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+            '& input': {
+              color: theme.palette.text.primary,
+            }, }}
           />
         </Grid>
       </Grid>

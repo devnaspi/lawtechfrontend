@@ -1,50 +1,44 @@
 import * as React from 'react';
-
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import Author from './Author';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
-import StyledTypography from './StyledTypography';
 
-
-const SyledCard = styled(Card)(({ theme }) => ({
+const StyledCard = styled(Card)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: 0,
     height: '100%',
     backgroundColor: theme.palette.background.paper,
     '&:hover': {
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
+        backgroundColor: theme.palette.grey[200],
+        cursor: 'pointer',
     },
     '&:focus-visible': {
-    outline: '3px solid',
-    outlineColor: 'hsla(210, 98%, 48%, 0.5)',
-    outlineOffset: '2px',
+        outline: `3px solid ${theme.palette.primary.main}`,
+        outlineOffset: '2px',
     },
 }));
 
-const SyledCardContent = styled(CardContent)({
+const StyledCardContent = styled(CardContent)({
     display: 'flex',
     flexDirection: 'column',
     gap: 2,
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 10,
-    paddingBottom: 5,
+    padding: '10px 10px 5px 10px',
     flexGrow: 1,
 });
+
 export default function MainContent() {
-    const router = useRouter()
+    const router = useRouter();
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
-    const [articles, setArticles] = useState([]); 
+    const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const handleFocus = (index) => {
@@ -52,8 +46,8 @@ export default function MainContent() {
     };
 
     const handleCardClick = (id) => {
-        router.push(`readers/articles/${id}`);
-    };        
+        router.push(`/readers/articles/${id}`);
+    };
 
     const handleBlur = () => {
         setFocusedCardIndex(null);
@@ -62,52 +56,49 @@ export default function MainContent() {
     useEffect(() => {
         const fetchArticles = async () => {
             try {
-            const response = await axiosInstance.get('/api/articles/');
-            setArticles(response.data.results); 
+                const response = await axiosInstance.get('/api/articles/');
+                setArticles(response.data.results);
             } catch (error) {
-            console.error('Failed to fetch articles:', error);
+                console.error('Failed to fetch articles:', error);
             } finally {
-            setLoading(false); 
+                setLoading(false);
             }
         };
-
         fetchArticles();
     }, []);
 
-        return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Grid container spacing={2} columns={12}>
-                    {articles.map((article, index) => (
-                        <Grid size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(article.id)}>
-                            <SyledCard
+    return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Grid container spacing={2} columns={12}>
+                {articles.map((article, index) => (
+                    <Grid key={article.id} item xs={12} sm={6} md={3} onClick={() => handleCardClick(article.id)}>
+                        <StyledCard
                             variant="outlined"
-                            onFocus={() => handleFocus(0)}
+                            onFocus={() => handleFocus(index)}
                             onBlur={handleBlur}
                             tabIndex={0}
-                            className={focusedCardIndex === 0 ? 'Mui-focused' : ''}
-                            >
+                            className={focusedCardIndex === index ? 'Mui-focused' : ''}
+                        >
                             <CardMedia
                                 component="img"
                                 alt="cover"
                                 image={article.cover_picture}
-                                aspect-ratio="16 / 9"
                                 sx={{
-                                borderBottom: '1px solid',
-                                borderColor: 'divider',
+                                    borderBottom: '1px solid',
+                                    borderColor: 'divider',
                                 }}
                             />
-                            <SyledCardContent>              
-                                <Typography gutterBottom variant="h6" component="div">
-                                {article.title}
+                            <StyledCardContent>
+                                <Typography gutterBottom variant="h6" color="text.primary" component="div">
+                                    {article.title}
                                 </Typography>
-                                <StyledTypography variant="body2" color="text.secondary" gutterBottom
-                                dangerouslySetInnerHTML={{ __html: article.content }} />
-                            </SyledCardContent>
+                                <Typography variant="body2" color="text.secondary" gutterBottom dangerouslySetInnerHTML={{ __html: article.content }} />
+                            </StyledCardContent>
                             <Author authors={[article.author]} created_at={article.created_at} />
-                            </SyledCard>
-                        </Grid>
-                    ))}
-                </Grid>
-            </Box>
-        );
+                        </StyledCard>
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>
+    );
 }

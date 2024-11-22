@@ -8,6 +8,7 @@ import useApiErrorHandler from '@/utils/useApiErrorHandler';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@emotion/react';
 
 
 const ManageProfile = () => {
@@ -22,6 +23,7 @@ const ManageProfile = () => {
     const { handleApiError } = useApiErrorHandler();
     const { enqueueSnackbar } = useSnackbar();
     const { auth, setAuth, loading, logout } = useAuth();
+    const theme = useTheme()
 
 
     useEffect(() => {
@@ -134,7 +136,20 @@ const ManageProfile = () => {
                 fullWidth
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                sx={{ mb: 3 }}
+                sx={{ mb: 3, '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                  '& input': {
+                    color: theme.palette.text.primary,
+                }, }}
             />
 
             <TextField
@@ -143,7 +158,20 @@ const ManageProfile = () => {
                 fullWidth
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                sx={{ mb: 3 }}
+                sx={{ mb: 3 , '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                  '& input': {
+                    color: theme.palette.text.primary,
+                }, }}
             />
 
             {/* Tags Input with Autocomplete for Multi-select */}
@@ -164,7 +192,20 @@ const ManageProfile = () => {
                     ))
                 }
                 renderInput={(params) => <TextField {...params} label="Specialties" variant="outlined" />}
-                sx={{ mt: 4, mb: 4 }}
+                sx={{  mt: 4, mb: 4 , '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                  '& input': {
+                    color: theme.palette.text.primary,
+                }, }}
             />
 
             {/* Save Button */}

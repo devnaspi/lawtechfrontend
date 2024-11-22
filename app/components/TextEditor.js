@@ -18,10 +18,11 @@ import {
   InsertPhoto as InsertPhotoIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
+import { useTheme } from '@emotion/react';
 
 const TextEditor = ({ cta, onCtaClick, initialContent = '' }) => {
   const [attachments, setAttachments] = useState([]);
-  const fileInputRef = useRef();
+  const theme = useTheme()
 
   const editor = useEditor({
     extensions: [
@@ -83,65 +84,104 @@ const TextEditor = ({ cta, onCtaClick, initialContent = '' }) => {
   return (
     <Box className="mt-1">
       <Box className="py-3 px-4 my-3 border rounded">
-        {/* Formatting Options - Single Line */}
         <Box sx={{ display: 'flex', justifyContent: 'start', flexWrap: 'wrap', mb: 2 }}>
           <IconButton
             onClick={() => editor && editor.chain().focus().toggleBold().run()}
-            color={editor?.isActive('bold') ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('bold')
+                ? theme.palette.primary.main 
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main 
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatBold />
           </IconButton>
           <IconButton
-            onClick={() => editor && editor.chain().focus().toggleItalic().run()}
-            color={editor?.isActive('italic') ? 'primary' : 'default'}
+            onClick={() => editor && editor.chain().focus().toggleItalic().run()}            
+            sx={{
+              color: editor?.isActive('italic')
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatItalic />
           </IconButton>
           <IconButton
             onClick={() => editor && editor.chain().focus().toggleUnderline().run()}
-            color={editor?.isActive('underline') ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('underline')
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatUnderlined />
           </IconButton>
           <IconButton
             onClick={() => editor && editor.chain().focus().setTextAlign('left').run()}
-            color={editor?.isActive('textAlign', { textAlign: 'left' }) ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('textAlign', { textAlign: 'left' })
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatAlignLeft />
           </IconButton>
           <IconButton
             onClick={() => editor && editor.chain().focus().setTextAlign('center').run()}
-            color={editor?.isActive('textAlign', { textAlign: 'center' }) ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('textAlign', { textAlign: 'center' })
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatAlignCenter />
           </IconButton>
           <IconButton
             onClick={() => editor && editor.chain().focus().setTextAlign('right').run()}
-            color={editor?.isActive('textAlign', { textAlign: 'right' }) ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('textAlign', { textAlign: 'right' })
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <FormatAlignRight />
           </IconButton>
           <IconButton
             onClick={() => editor && editor.chain().focus().toggleLink({ href: window.prompt('URL') }).run()}
-            color={editor?.isActive('link') ? 'primary' : 'default'}
+            sx={{
+              color: editor?.isActive('link')
+                ? theme.palette.primary.main
+                : theme.palette.mode === 'dark'
+                ? theme.palette.primary.main
+                : theme.palette.text.secondary,
+            }}
           >
             <LinkIcon />
           </IconButton>
-          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
-          <IconButton onClick={() => fileInputRef.current.click()} color="default">
-            <InsertPhotoIcon />
-          </IconButton>
         </Box>
 
-        {/* Editor Content */}
         <Box
           onClick={() => editor?.view?.focus()}
-          sx={{ minHeight: '50vh', border: 'solid 0.5px #40A758', borderRadius: 1, p: 2, mb: 2 }}
+          sx={{ minHeight: '50vh', border: 'solid 0.5px #ee8822', 
+          borderRadius: 1, p: 2, mb: 2 
+        }}
         >
-          <EditorContent editor={editor} />
+          <EditorContent editor={editor} style={{
+            outline: 'none',
+          }} />
         </Box>
 
-        {/* CTA Button */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="contained" sx={{ mt: 2 }} onClick={handleButtonClick}>
             {cta}
@@ -151,7 +191,6 @@ const TextEditor = ({ cta, onCtaClick, initialContent = '' }) => {
           </IconButton>
         </Box>
 
-        {/* Attachments */}
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
           {attachments.map((attachment) => (
             <span

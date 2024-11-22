@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import axios from '@/lib/axios';
@@ -10,6 +10,14 @@ export default function EmailCollection({ open, handleClose, onOTPSuccess }) {
     const [email, setEmail] = useState('');
     const { enqueueSnackbar } = useSnackbar();
     const { handleApiError } = useApiErrorHandler();
+
+    useEffect(() => {
+        const prefillEmail = sessionStorage.getItem('prefill_email');
+        if (prefillEmail) {
+            setEmail(prefillEmail);
+            sessionStorage.removeItem('prefill_email');
+        }
+    }, []);
 
     const handleEmailSubmit = async () => {
         if (!email) {

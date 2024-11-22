@@ -5,32 +5,38 @@ import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, IconButton } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import TextEditor from '@/app/components/TextEditor';
+import { useTheme } from '@emotion/react';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
+import axiosInstance from '@/lib/axios';
+
 
 const CreateContract = () => {
+  const theme = useTheme()
+  const { handleApiError } = useApiErrorHandler();
   const [contractData, setContractData] = useState({
     name: '',
-    fields: [{ fieldName: '', fieldType: 'text', options: [] }],
+    fields: [{ field_name: '', field_type: 'text', options: [] }],
     body: '',
   });
 
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...contractData.fields];
     updatedFields[index][field] = value;
-    if (field === 'fieldType' && value !== 'options') {
-      updatedFields[index].options = []; // Clear options if the field type is changed to something other than 'options'
+    if (field === 'field_type' && value !== 'options') {
+      updatedFields[index].options = []; 
     }
     setContractData({ ...contractData, fields: updatedFields });
   };
 
   const handleAddField = () => {
-    setContractData({ ...contractData, fields: [...contractData.fields, { fieldName: '', fieldType: 'text', options: [] }] });
+    setContractData({ ...contractData, fields: [...contractData.fields, { field_name: '', field_type: 'text', options: [] }] });
   };
 
-  const handleAddOption = (fieldIndex) => {
-    const updatedFields = [...contractData.fields];
-    updatedFields[fieldIndex].options.push('');
-    setContractData({ ...contractData, fields: updatedFields });
-  };
+  // const handleAddOption = (fieldIndex) => {
+  //   const updatedFields = [...contractData.fields];
+  //   updatedFields[fieldIndex].options.push('');
+  //   setContractData({ ...contractData, fields: updatedFields });
+  // };
 
   const handleOptionChange = (fieldIndex, optionIndex, value) => {
     const updatedFields = [...contractData.fields];
@@ -44,15 +50,28 @@ const CreateContract = () => {
     setContractData({ ...contractData, fields: updatedFields });
   };
 
-  const handleSaveContract = (noteDetails) => {
+  const handleSaveContract = async (noteDetails) => {
     const updatedContractData = {
-      ...contractData,
-      body: noteDetails.html, // Use the HTML content from the editor
+        ...contractData,
+        body: noteDetails.html,
     };
 
-    console.log('Contract data:', updatedContractData);
-    // Add logic to save contract data to backend
-  };
+    console.log('Contract data to save:', updatedContractData);
+
+    try {
+        const response = await axiosInstance.post('/api/contracts/create', updatedContractData);
+
+        if (response.status === 201) {
+            console.log('Contract saved successfully:', response.data);
+            alert('Contract saved successfully!');
+        } else {
+            console.error('Failed to save contract:', response);
+            alert('Failed to save contract.');
+        }
+    } catch (error) {
+        handleApiError(error)
+    }
+};
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -74,7 +93,20 @@ const CreateContract = () => {
         fullWidth
         value={contractData.name}
         onChange={(e) => setContractData({ ...contractData, name: e.target.value })}
-        sx={{ mb: 3 }}
+        sx={{ mb: 3, '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+        },
+        '& input': {
+          color: theme.palette.text.primary,
+      }, }}
       />
 
       {/* Dynamic Fields for Contract */}
@@ -84,28 +116,54 @@ const CreateContract = () => {
             <TextField
               label="Field Name"
               variant="outlined"
-              value={field.fieldName}
-              onChange={(e) => handleFieldChange(index, 'fieldName', e.target.value)}
-              sx={{ flex: 1 }}
+              value={field.field_name}
+              onChange={(e) => handleFieldChange(index, 'field_name', e.target.value)}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+              '& input': {
+                color: theme.palette.text.primary,
+            }, }}
             />
-            <TextField
+            {/* <TextField
               select
               label="Field Type"
               variant="outlined"
-              value={field.fieldType}
-              onChange={(e) => handleFieldChange(index, 'fieldType', e.target.value)}
-              sx={{ width: '150px' }}
+              value={field.field_type}
+              onChange={(e) => handleFieldChange(index, 'field_type', e.target.value)}
+              sx={{  width: '150px', '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+              '& input': {
+                color: theme.palette.text.primary,
+            }, }}
               SelectProps={{ native: true }}
             >
               <option value="text">Text</option>
               <option value="number">Number</option>
               <option value="date">Date</option>
               <option value="options">Options</option>
-            </TextField>
+            </TextField> */}
           </Box>
 
           {/* Conditionally Render Options Input for 'Options' Field Type */}
-          {field.fieldType === 'options' && (
+          {field.field_type === 'options' && (
             <Box sx={{ mt: 2 }}>
               {field.options.map((option, optionIndex) => (
                 <Box key={optionIndex} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -114,7 +172,20 @@ const CreateContract = () => {
                     variant="outlined"
                     value={option}
                     onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
-                    sx={{ flex: 1, mr: 1 }}
+                    sx={{ flex: 1, mr: 1, '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: theme.palette.primary.main,
+                      },
+                      '&:hover fieldset': {
+                        borderColor: theme.palette.primary.main,
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: theme.palette.primary.main,
+                      },
+                    },
+                    '& input': {
+                      color: theme.palette.text.primary,
+                  }, }}
                   />
                   <IconButton onClick={() => handleRemoveOption(index, optionIndex)} color="error">
                     <RemoveCircleOutline />
@@ -143,8 +214,8 @@ const CreateContract = () => {
 
       {/* Integrating TextEditor Component */}
       <TextEditor
-        cta="Save Contract" // Change CTA button text
-        onCtaClick={handleSaveContract} // Use this handler to save the contract
+        cta="Save Contract"
+        onCtaClick={handleSaveContract}
       />
     </Container>
   );

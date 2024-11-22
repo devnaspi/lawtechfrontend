@@ -33,7 +33,7 @@ const LawFirmSidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.post('/api/users/auth/logout');
+      await axiosInstance.post('/api/users/auth/logout/');
       logout();
       enqueueSnackbar('Logout successful!', { variant: 'success' });
       router.push('/lawfirms/signin');

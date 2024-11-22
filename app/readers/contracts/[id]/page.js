@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Grid, Box, Typography, TextField, Button, CircularProgress, Alert } from '@mui/material';
 import axiosInstance from '@/lib/axios';
+import { useTheme } from '@emotion/react';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 const ContractDetail = ({ params }) => {
     const [contract, setContract] = useState(null);
@@ -13,6 +15,9 @@ const ContractDetail = ({ params }) => {
     const [downloadUrl, setDownloadUrl] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
     const contractId = params.id;
+    const theme = useTheme()
+    const { handleApiError } = useApiErrorHandler();
+
 
     useEffect(() => {
         const fetchContractDetails = async () => {
@@ -64,7 +69,9 @@ const ContractDetail = ({ params }) => {
             setDownloadUrl(response.data.download_url);
             setPreviewUrl(response.data.preview_url);
         } catch (err) {
-            setError('Error generating contract.');
+            // handleApiError(err);
+            console.log('id is ', contractId)
+
             console.error('Error generating contract:', err);
         }
     };
@@ -110,6 +117,20 @@ const ContractDetail = ({ params }) => {
                                 required
                                 value={formData[field.field_name] || ''}
                                 onChange={handleInputChange}
+                                sx={{ '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                      borderColor: theme.palette.primary.main,
+                                    },
+                                    '&:hover fieldset': {
+                                      borderColor: theme.palette.primary.main,
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                      borderColor: theme.palette.primary.main,
+                                    },
+                                  },
+                                  '& input': {
+                                    color: theme.palette.text.primary,
+                                }, }}
                             />
                         ))}
                         <Button variant="contained" onClick={handleSave} sx={{ mt: 2 }}>
