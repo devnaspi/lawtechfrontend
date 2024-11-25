@@ -1,16 +1,19 @@
 import * as React from 'react';
-import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';  
-import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Search from './Search';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
+import AppBar from '@mui/material/AppBar';
+
+
+
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
     position: 'fixed',
@@ -20,21 +23,20 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
     flexShrink: 0,
     borderBottom: '1px solid',
     borderColor: theme.palette.divider,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[1],
-    backgroundImage: 'none',
     padding: 4,
 }));
 
 function NavBar() {
-    const [mode] = useState('light');
-    const defaultTheme = createTheme({ palette: { mode } });
     const router = useRouter()
     const { auth } = useAuth();
+    const theme = useTheme();
 
     return (
-        <ThemeProvider theme={defaultTheme}>
-            <StyledAppBar>
+            <StyledAppBar
+            sx={{
+                backgroundColor: theme.palette.background.default,
+                // boxShadow: theme.shadows[1],
+            }}>
                 <Container maxWidth="lg">
                     <Toolbar
                         variant="dense"
@@ -51,9 +53,12 @@ function NavBar() {
                             aria-label="LAWTECH"
                             component="a"
                             href="/readers/"
-                            sx={{ display: { xs: 'none', sm: 'flex' } }}
+                            sx={{
+                                color: theme.palette.primary.main,
+                                display: { xs: 'none', sm: 'flex' }
+                            }}
                         >
-                            LAWTECH
+                            <Typography fontWeight={'800'}>LAWTECH</Typography>
                         </Button>
 
                         <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
@@ -78,7 +83,6 @@ function NavBar() {
                     </Toolbar>
                 </Container>
             </StyledAppBar>
-        </ThemeProvider>
     );
 }
 

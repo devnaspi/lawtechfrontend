@@ -1,29 +1,31 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography, IconButton, InputAdornment } from '@mui/material';
 import axiosInstance from '@/lib/axios';
+import CloseIcon from '@mui/icons-material/Close';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
-
+import { useTheme } from '@mui/material/styles';
 
 
 export default function Signin({ open, handleClose }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { login } = useAuth();
     const { handleApiError } = useApiErrorHandler();
-
+    const theme = useTheme();
 
     const redirectTo = searchParams.get('redirect') || '/readers';
-
     useEffect(() => {
         const prefillEmail = sessionStorage.getItem('prefill_email');
         if (prefillEmail) {    
@@ -93,8 +95,10 @@ export default function Signin({ open, handleClose }) {
             PaperProps={{
                 sx: {
                     padding: 2,
+                    backgroundColor: theme.palette.background.default,
                 },
             }}
+
         >
             <DialogTitle
                 sx={{
@@ -137,11 +141,24 @@ export default function Signin({ open, handleClose }) {
                     <TextField
                         label="Password"
                         variant="outlined"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         fullWidth
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        edge="end"
+                                        aria-label="toggle password visibility"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <Button
                         variant="contained"

@@ -14,7 +14,9 @@ import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '../components/theme';
+
 
 export default function ClientLayout({ children }) {
     const [openSignInModal, setOpenSignInModal] = useState(false);
@@ -23,7 +25,20 @@ export default function ClientLayout({ children }) {
     const [openCompleteRegistrationModal, setOpenCompleteRegistrationModal] = useState(false);
     const [email, setEmail] = useState('');
     const [showAppBar, setShowAppBar] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        const handleChange = (event) => {
+            setDarkMode(event.matches);
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
+    }, []);
 
     const router = useRouter();
     const pathname = usePathname();
@@ -76,55 +91,6 @@ export default function ClientLayout({ children }) {
         setOpenSignUpModal(false);
         setOpenOTPModal(true);
     };
-
-    const theme = useMemo(() => {
-        return createTheme({
-            palette: {
-                mode: darkMode ? 'dark' : 'light',
-                primary: {
-                    main: '#ee8822',
-                },
-                background: {
-                    default: darkMode ? '#121212' : '#fafafa',
-                    paper: darkMode ? '#1e1e1e' : '#ffffff',
-                    appBar: darkMode ? '#ffffff' : '#f5f5f5',
-                },
-                text: {
-                    primary: darkMode ? '#ffffff' : '#000000',
-                    secondary: darkMode ? '#eeeeee' : '#666666',
-                },
-                orange: {
-                    100: '#ffcc80',
-                    200: '#ffab66',
-                    300: '#ff9900',
-                },
-            },
-            typography: {
-                fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-            },
-            components: {
-                MuiAppBar: {
-                    styleOverrides: {
-                        root: {
-                            backgroundColor: darkMode ? '#ffffff' : 'transparent',
-                        },
-                    },
-                },
-                MuiLink: {
-                    styleOverrides: {
-                        root: {
-                            color: darkMode ? '#e67e22' : '#ee8822',
-                            '&:hover': {
-                                color: darkMode ? '#ffab66' : '#d1761b',
-                            },
-                            textDecoration: 'none',
-                        },
-                    },
-                },
-            },
-        });
-    }, [darkMode]);    
-    
 
     return (
         <ThemeProvider theme={theme}>

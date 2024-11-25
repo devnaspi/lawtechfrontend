@@ -3,6 +3,8 @@ import { FormControl, OutlinedInput, InputAdornment, List, ListItem, CircularPro
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import axiosInstance from '@/lib/axios';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@mui/material/styles';
+
 
 function Search() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -12,6 +14,8 @@ function Search() {
     const [showDropdown, setShowDropdown] = useState(false);
     const searchRef = useRef(null);
     const router = useRouter();
+    const theme = useTheme();
+
 
     useEffect(() => {
         if (searchTerm.trim() === "") {
@@ -82,9 +86,15 @@ function Search() {
                     placeholder="Search articles and contracts"
                     value={searchTerm}
                     onChange={handleInputChange}
-                    sx={{ flexGrow: 1 }}
+                    sx={{ flexGrow: 1, }}
                     startAdornment={
-                        <InputAdornment position="start" sx={{ color: 'text.primary' }}>
+                        <InputAdornment 
+                        position="start" 
+                        sx={{
+                            color: (theme) =>
+                                theme.palette.mode === 'dark' ? '#ffffff' : 'text.primary',
+                        }}
+                        >
                             <SearchRoundedIcon fontSize="small" />
                         </InputAdornment>
                     }

@@ -18,6 +18,8 @@ import {
     CircularProgress,
 } from '@mui/material';
 import axiosInstance from '@/lib/axios';
+import Pagination from '@/app/components/Pagination';
+
 
 const ContractsList = () => {
     const [contracts, setContracts] = useState([]);
@@ -27,6 +29,8 @@ const ContractsList = () => {
     const [tags, setTags] = useState([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [paginationData, setPaginationData] = useState(null);
+
 
     useEffect(() => {
         const fetchContracts = async () => {
@@ -34,6 +38,7 @@ const ContractsList = () => {
             try {
                 const response = await axiosInstance.get('/api/contracts/');
                 const data = response.data.results;
+                setPaginationData(response.data);
                 setContracts(data);
 
                 const uniqueTags = new Set();
@@ -167,6 +172,16 @@ const ContractsList = () => {
                         </Grid>
                     )}
                 </Grid>
+            )}
+
+            {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
             )}
         </Container>
     );

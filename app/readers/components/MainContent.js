@@ -10,6 +10,8 @@ import Author from './Author';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
+import Pagination from '@/app/components/Pagination';
+
 
 const StyledCard = styled(Card)(({ theme }) => ({
     display: 'flex',
@@ -18,7 +20,9 @@ const StyledCard = styled(Card)(({ theme }) => ({
     height: '100%',
     backgroundColor: theme.palette.background.paper,
     '&:hover': {
-        backgroundColor: theme.palette.grey[200],
+        backgroundColor: theme.palette.mode === 'dark' 
+            ? theme.palette.grey[800]  
+            : theme.palette.grey[200], 
         cursor: 'pointer',
     },
     '&:focus-visible': {
@@ -38,8 +42,8 @@ const StyledCardContent = styled(CardContent)({
 export default function MainContent() {
     const router = useRouter();
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
-    const [articles, setArticles] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [articles, setArticles] = useState([])
+    const [paginationData, setPaginationData] = useState(null);
 
     const handleFocus = (index) => {
         setFocusedCardIndex(index);
@@ -53,17 +57,18 @@ export default function MainContent() {
         setFocusedCardIndex(null);
     };
 
+    const fetchArticles = async (page = 1) => {
+        try {
+            const response = await axiosInstance.get(`/api/articles/?page=${page}`);
+            setArticles(response.data.results);
+            console.log('response from main is', response.data)
+            setPaginationData(response.data);
+        } catch (error) {
+            console.error('Failed to fetch articles:', error);
+        }
+    };
+
     useEffect(() => {
-        const fetchArticles = async () => {
-            try {
-                const response = await axiosInstance.get('/api/articles/');
-                setArticles(response.data.results);
-            } catch (error) {
-                console.error('Failed to fetch articles:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchArticles();
     }, []);
 
@@ -99,6 +104,16 @@ export default function MainContent() {
                     </Grid>
                 ))}
             </Grid>
+
+            {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
+            )}
         </Box>
     );
 }
