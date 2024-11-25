@@ -61,7 +61,6 @@ export default function MainContent() {
         try {
             const response = await axiosInstance.get(`/api/articles/?page=${page}`);
             setArticles(response.data.results);
-            console.log('response from main is', response.data)
             setPaginationData(response.data);
         } catch (error) {
             console.error('Failed to fetch articles:', error);

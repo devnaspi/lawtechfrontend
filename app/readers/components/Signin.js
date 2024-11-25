@@ -10,7 +10,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
-import { useTheme } from '@mui/material/styles';
 
 
 export default function Signin({ open, handleClose }) {
@@ -23,7 +22,6 @@ export default function Signin({ open, handleClose }) {
     const searchParams = useSearchParams();
     const { login } = useAuth();
     const { handleApiError } = useApiErrorHandler();
-    const theme = useTheme();
 
     const redirectTo = searchParams.get('redirect') || '/readers';
     useEffect(() => {
@@ -95,7 +93,6 @@ export default function Signin({ open, handleClose }) {
             PaperProps={{
                 sx: {
                     padding: 2,
-                    backgroundColor: theme.palette.background.default,
                 },
             }}
 

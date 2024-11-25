@@ -1,19 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-
-const getDarkModePreference = (darkModeState) => {
-    if (darkModeState !== undefined) {
-        return darkModeState; 
-    }
-    if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-};
-
-const createAppTheme = (darkModeState) => {
-    const darkMode = getDarkModePreference(darkModeState);
-
+const createAppTheme = (darkMode) => {
     return createTheme({
         palette: {
             mode: darkMode ? 'dark' : 'light',
@@ -29,14 +16,24 @@ const createAppTheme = (darkModeState) => {
                 primary: darkMode ? '#ffffff' : '#000000',
                 secondary: darkMode ? '#eeeeee' : '#666666',
             },
-            orange: {
-                100: '#ffcc80',
-                200: '#ffab66',
-                300: '#ff9900',
-            },
         },
         typography: {
             fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+        },
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: 'transparent',
+                    color: darkMode ? '#e67e22' : '#ee8822',
+                    borderColor: '#e67e22',
+                },
+                deleteIcon: {
+                color: '#e67e22',
+                '&:hover': {
+                    color: '#e67e22',
+                },
+                },
+            },
         },
     });
 };

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { alpha, styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import AppBar from '@mui/material/AppBar';
+
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
     display: 'flex',

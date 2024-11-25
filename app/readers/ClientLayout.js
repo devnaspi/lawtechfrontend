@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import AppAppBar from './components/AppAppBar';
 import NavBar from './components/NavBar';
+import AppAppBar from './components/AppAppBar';
 import Footer from './components/Footer';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
@@ -15,10 +15,15 @@ import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from '../components/theme';
+import createAppTheme from '../components/theme';
 
 
 export default function ClientLayout({ children }) {
+    const [hydrated, setHydrated] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+
+    const [theme, setTheme] = useState(createAppTheme(false)); 
+
     const [openSignInModal, setOpenSignInModal] = useState(false);
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
     const [openOTPModal, setOpenOTPModal] = useState(false);
@@ -26,23 +31,28 @@ export default function ClientLayout({ children }) {
     const [email, setEmail] = useState('');
     const [showAppBar, setShowAppBar] = useState(true);
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const { auth, loading } = useAuth();
+
+
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
+
         const handleChange = (event) => {
             setDarkMode(event.matches);
         };
 
+        setDarkMode(mediaQuery.matches);
         mediaQuery.addEventListener('change', handleChange);
 
-        return () => {
-            mediaQuery.removeEventListener('change', handleChange);
-        };
+        setHydrated(true);
+        return () => mediaQuery.removeEventListener('change', handleChange);
     }, []);
 
-    const router = useRouter();
-    const pathname = usePathname();
-    const { auth, loading } = useAuth();
+    useEffect(() => {
+        setTheme(createAppTheme(darkMode));
+    }, [darkMode]);
 
     useEffect(() => {
         if (pathname === '/readers/login') {
@@ -91,6 +101,8 @@ export default function ClientLayout({ children }) {
         setOpenSignUpModal(false);
         setOpenOTPModal(true);
     };
+
+    if (!hydrated) return null;
 
     return (
         <ThemeProvider theme={theme}>

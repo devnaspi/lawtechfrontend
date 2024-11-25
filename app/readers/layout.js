@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
-import '../globals.css';
 import ClientLayout from './ClientLayout';
+import '../globals.css';
+
 import { AuthProvider } from '@/context/AuthContext';
 
 

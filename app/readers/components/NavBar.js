@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';  
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
@@ -8,11 +7,9 @@ import Stack from '@mui/material/Stack';
 import { useAuth } from '@/context/AuthContext';
 import Search from './Search';
 import { useRouter } from 'next/navigation';
-import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-
-
 
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({

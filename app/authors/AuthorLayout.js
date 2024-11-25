@@ -8,19 +8,42 @@ import { useRouter, usePathname } from 'next/navigation';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { SnackbarProvider } from 'notistack';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import createAppTheme from '../components/theme';
 
 
 export default function AuthorLayout({ children }) {
+    const [hydrated, setHydrated] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+    const [theme, setTheme] = useState(createAppTheme(false));    
+
     const router = useRouter();
     const { auth, loading } = useAuth();
     const pathname = usePathname();
     const noLayoutRoutes = ['/authors/signin', '/authors/signup'];
     const [authChecked, setAuthChecked] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
     
 
     let shouldShowLayout = !noLayoutRoutes.includes(pathname);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const handleChange = (event) => {
+            setDarkMode(event.matches);
+        };
+
+        setDarkMode(mediaQuery.matches);
+        mediaQuery.addEventListener('change', handleChange);
+
+        setHydrated(true);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
+    useEffect(() => {
+        setTheme(createAppTheme(darkMode));
+    }, [darkMode]);
 
     useEffect(() => {
         if (!loading) {
@@ -35,69 +58,6 @@ export default function AuthorLayout({ children }) {
         }
     }, [pathname, auth.isAuthenticated, loading, router]);
 
-    const theme = useMemo(() => {
-        return createTheme({
-            palette: {
-                mode: darkMode ? 'dark' : 'light',
-                primary: {
-                    main: '#ee8822',
-                },
-                background: {
-                    default: darkMode ? '#121212' : '#fafafa',
-                    paper: darkMode ? '#1e1e1e' : '#ffffff',
-                    appBar: darkMode ? '#ffffff' : '#f5f5f5',
-                },
-                text: {
-                    primary: darkMode ? '#ffffff' : '#000000',
-                    secondary: darkMode ? '#eeeeee' : '#666666',
-                },
-                orange: {
-                    100: '#ffcc80',
-                    200: '#ffab66',
-                    300: '#ff9900',
-                },
-            },
-            typography: {
-                fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-            },
-            components: {
-                MuiAppBar: {
-                    styleOverrides: {
-                        root: {
-                            backgroundColor: darkMode ? '#ffffff' : 'transparent',
-                        },
-                    },
-                },
-                MuiLink: {
-                    styleOverrides: {
-                        root: {
-                            color: darkMode ? '#e67e22' : '#ee8822',
-                            '&:hover': {
-                                color: darkMode ? '#ffab66' : '#d1761b',
-                            },
-                            textDecoration: 'none',
-                        },
-                    },
-                },
-                MuiChip: {
-                    styleOverrides: {
-                        root: {
-                            backgroundColor: 'transparent',
-                            color: darkMode ? '#e67e22' : '#ee8822',
-                            borderColor: '#e67e22',
-                        },
-                        deleteIcon: {
-                        color: '#e67e22',
-                        '&:hover': {
-                            color: '#e67e22',
-                        },
-                        },
-                    },
-                },
-            },
-        });
-    }, [darkMode]); 
-
     if (loading || !authChecked) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -106,9 +66,13 @@ export default function AuthorLayout({ children }) {
         );
     }
 
+    if (!hydrated) return null;
+
     return (
         <ThemeProvider theme={theme}>
             <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                <CssBaseline />    
+    
                 <div style={{ display: 'flex', minHeight: '100vh' }}>
                     {shouldShowLayout && (
                         <>
