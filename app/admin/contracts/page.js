@@ -4,17 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { Container, Typography, Grid, Card, CardContent, Button, CircularProgress, Box } from '@mui/material';
 import axiosInstance from '@/lib/axios';
 import { useRouter } from 'next/navigation';
+import Pagination from '@/app/components/Pagination';
+
 
 const ContractsPage = () => {
     const router = useRouter();
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [paginationData, setPaginationData] = useState(null);
 
     useEffect(() => {
         const fetchContracts = async () => {
             try {
                 const response = await axiosInstance.get('/api/contracts/');
                 setContracts(response.data.results);
+                setPaginationData(response.data);
             } catch (error) {
                 console.error('Failed to fetch contracts:', error);
             } finally {
@@ -75,6 +79,15 @@ const ContractsPage = () => {
                     </Box>
                 )}
             </Grid>
+            {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
+            )}
         </Container>
     );
 };

@@ -16,6 +16,7 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
+import Pagination from '@/app/components/Pagination';
 
 const lawFirmsData = [
     {
@@ -42,6 +43,8 @@ const LawFirmsList = () => {
     const [filteredLawFirms, setFilteredLawFirms] = useState([]);
     const [tags, setTags] = useState([]);
     const router = useRouter();
+    const [paginationData, setPaginationData] = useState(null);
+
 
     useEffect(() => {
         const fetchLawFirms = async () => {

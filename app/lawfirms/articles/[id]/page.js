@@ -7,6 +7,7 @@ import { Container, Box, Typography, Grid, Paper, CircularProgress, Stack, Card,
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import axiosInstance from '@/lib/axios';
+import Pagination from '@/app/components/Pagination';
 
 const LawFirmArticleDetails = ({ params }) => {
     const router = useRouter();
@@ -14,6 +15,7 @@ const LawFirmArticleDetails = ({ params }) => {
     const [article, setArticle] = useState(null);
     const [similarArticles, setSimilarArticles] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [paginationData, setPaginationData] = useState(null);
 
     useEffect(() => {
         fetchArticle();
@@ -25,6 +27,7 @@ const LawFirmArticleDetails = ({ params }) => {
         try {
             const response = await axiosInstance.get(`/api/articles/${id}/`);
             setArticle(response.data);
+            setPaginationData(response.data);
         } catch (error) {
             console.error('Error fetching article:', error);
         } finally {
@@ -190,6 +193,16 @@ const LawFirmArticleDetails = ({ params }) => {
                         </Grid>
                     ))}
                 </Grid>
+
+                {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
+            )}
             </Box>
         </Container>
     );

@@ -32,6 +32,8 @@ import CardMedia from '@mui/material/CardMedia';
 import StyledTypography from '../components/StyledTypography';
 import Author from '../components/Author';
 import Grid from '@mui/material/Grid2';
+import Pagination from '@/app/components/Pagination';
+
 
 
 const SyledCard = styled(Card)(({ theme }) => ({
@@ -79,6 +81,9 @@ const EditProfile = () => {
     const [readArticles, setReadArticles] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
+
+    const [paginationData, setPaginationData] = useState(null);
+
 
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
@@ -163,6 +168,7 @@ const EditProfile = () => {
         try {
             const response = await axiosInstance.get('/api/bookmarks/');
             setBookmarks(response.data.results);
+            setPaginationData(response.data);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -175,6 +181,7 @@ const EditProfile = () => {
         try {
             const response = await axiosInstance.get('/api/history/');
             setReadArticles(response.data.results);
+            setPaginationData(response.data);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -427,6 +434,15 @@ const EditProfile = () => {
                     </>
                 )}
             </Box>
+            {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
+            )}
         </Container>
     );
 };

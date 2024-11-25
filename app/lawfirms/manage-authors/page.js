@@ -6,6 +6,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import axiosInstance from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import Pagination from '@/app/components/Pagination';
 
 const ManageAuthors = () => {
   const [authors, setAuthors] = useState([]);
@@ -13,6 +14,7 @@ const ManageAuthors = () => {
   const [selectedAuthor, setSelectedAuthor] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
+  const [paginationData, setPaginationData] = useState(null);
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -21,6 +23,7 @@ const ManageAuthors = () => {
       try {
         const response = await axiosInstance.get('/api/lawfirms/authors/');
         setAuthors(response.data.results);
+        setPaginationData(response.data);
         setLoading(false);
       } catch (error) {
         enqueueSnackbar('Failed to fetch authors', { variant: 'error' });
@@ -116,6 +119,15 @@ const ManageAuthors = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
+                </Box>
+            )}
     </Container>
   );
 };

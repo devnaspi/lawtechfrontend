@@ -5,17 +5,21 @@ import { Container, Typography, Grid, Card, CardContent, Box, CardActionArea } f
 import axiosInstance from '@/lib/axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useRouter } from 'next/navigation';
+import Pagination from '@/app/components/Pagination';
 
 const LawFirmArticles = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const [paginationData, setPaginationData] = useState(null);
+
 
     useEffect(() => {
         const fetchArticles = async () => {
             try {
                 const response = await axiosInstance.get('/api/lawfirms/articles/');
                 setArticles(response.data);
+                setPaginationData(response.data);
             } catch (error) {
                 console.error('Error fetching articles:', error);
             } finally {
@@ -75,6 +79,16 @@ const LawFirmArticles = () => {
                     <Typography variant="h6" color="textSecondary">
                         No articles found.
                     </Typography>
+                </Box>
+            )}
+
+            {paginationData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        data={paginationData}
+                        limit={10}
+                        onPageChange={(page) => fetchArticles(page)}
+                    />
                 </Box>
             )}
         </Container>
