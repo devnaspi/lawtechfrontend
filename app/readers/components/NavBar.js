@@ -72,7 +72,14 @@ function NavBar() {
                                     src={auth.user?.profile_picture || '/static/images/avatar/1.jpg'}
                                     sx={{ width: 32, height: 32 }}
                                 />
-                                <Typography color='black' variant="body1" sx={{ fontWeight: 'bold' }}>
+                                
+                                <Typography
+                                    color='black' 
+                                    variant="body1" 
+                                    sx={{
+                                        color: theme.palette.text,
+                                        display: { xs: 'none', sm: 'flex', fontWeight: 'bold' }
+                                    }}>
                                     {auth.user?.username}
                                 </Typography>
                             </Stack>

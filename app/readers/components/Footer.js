@@ -98,13 +98,13 @@ export default function Footer() {
                 }}
             >
                 <div>
-                    <Link color="text.secondary" variant="body2" href="/readers/#">
+                    <Link display={'none'} color="text.secondary" variant="body2" href="/readers/#">
                         Privacy Policy
                     </Link>
-                    <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
+                    {/* <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
                         &nbsp;•&nbsp;
-                    </Typography>
-                    <Link color="text.secondary" variant="body2" href="/readers/#">
+                    </Typography> */}
+                    <Link  display={'none'} color="text.secondary" variant="body2" href="/readers/#">
                         Terms of Service
                     </Link>
                     <Copyright />
@@ -113,7 +113,7 @@ export default function Footer() {
                     direction="row"
                     spacing={1}
                     useFlexGap
-                    sx={{ justifyContent: 'left', color: 'text.secondary' }}
+                    sx={{ justifyContent: 'left', color: 'text.secondary', display: 'none' }}
                 >
                     <IconButton
                         color="inherit"

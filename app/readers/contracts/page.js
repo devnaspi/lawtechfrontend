@@ -32,26 +32,26 @@ const ContractsList = () => {
     const [paginationData, setPaginationData] = useState(null);
 
 
+    const fetchContracts = async (page = 1) => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get(`/api/contracts/?page=${page}`);
+            const data = response.data.results;
+            setPaginationData(response.data);
+            setContracts(data);
+
+            const uniqueTags = new Set();
+            data.forEach(contract => {
+                contract.tags.forEach(tag => uniqueTags.add(tag));
+            });
+            setTags([...uniqueTags]);
+        } catch (error) {
+            console.error("Error fetching contracts:", error);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
-        const fetchContracts = async () => {
-            setLoading(true);
-            try {
-                const response = await axiosInstance.get('/api/contracts/');
-                const data = response.data.results;
-                setPaginationData(response.data);
-                setContracts(data);
-
-                const uniqueTags = new Set();
-                data.forEach(contract => {
-                    contract.tags.forEach(tag => uniqueTags.add(tag));
-                });
-                setTags([...uniqueTags]);
-            } catch (error) {
-                console.error("Error fetching contracts:", error);
-            }
-            setLoading(false);
-        };
-
         fetchContracts();
     }, []);
 
@@ -179,7 +179,7 @@ const ContractsList = () => {
                     <Pagination
                         data={paginationData}
                         limit={10}
-                        onPageChange={(page) => fetchArticles(page)}
+                        onPageChange={(page) => fetchContracts(page)}
                     />
                 </Box>
             )}

@@ -115,7 +115,7 @@ function Search() {
             {showDropdown && !loading && searchResults.length > 0 && (
                 <List sx={{ position: 'absolute', zIndex: 5, backgroundColor: 'white', color: 'black',  width: '100%' }}>
                     {searchResults.map(result => (
-                        <ListItem button key={result.id} onClick={() => handleResultClick(result.id)}>
+                        <ListItem  sx={{cursor: 'pointer'}} button key={result.id} onClick={() => handleResultClick(result.id)}>
                             <Typography
                                 variant="body2"
                                 color="textSecondary"
@@ -125,7 +125,7 @@ function Search() {
                                     overflow: 'hidden',
                                     WebkitLineClamp: 2,
                                     textOverflow: 'ellipsis',
-                                    color: 'black'
+                                    color: 'black',
                                 }}
                                 dangerouslySetInnerHTML={{ __html: result.title }}
                                 />

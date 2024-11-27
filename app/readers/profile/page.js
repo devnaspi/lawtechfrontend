@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import {
     Container,
@@ -76,14 +76,18 @@ const EditProfile = () => {
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [pageLimit, setPageLimit] = useState(10)
 
     const [bookmarks, setBookmarks] = useState([]);
     const [readArticles, setReadArticles] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
 
-    const [paginationData, setPaginationData] = useState(null);
+    const [bookmarksPaginationData, setBookmarksPaginationData] = useState(null);
+    const [readArticlesPaginationData, setReadArticlePaginationData] = useState(null);
 
+    const searchParams = useSearchParams();
+    
 
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
@@ -134,7 +138,7 @@ const EditProfile = () => {
                 formData.append('profile_picture', profilePicture);
             }
 
-            await axiosInstance.put('/api/users/profile', formData, {
+            await axiosInstance.put('/api/users/profile/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -154,8 +158,14 @@ const EditProfile = () => {
     };
 
     const handleTabChange = (event, newValue) => {
+        const currentUrl = window.location.pathname;
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('page');
+        const newUrl = `${currentUrl}?${params.toString()}`;
+    
+        router.replace(newUrl);
+    
         setSelectedTab(newValue);
-
         if (newValue === 1) {
             fetchBookmarks();
         } else if (newValue === 2) {
@@ -163,12 +173,13 @@ const EditProfile = () => {
         }
     };
 
-    const fetchBookmarks = async () => {
+    const fetchBookmarks = async (page = 1) => {
         setLoadingData(true);
         try {
-            const response = await axiosInstance.get('/api/bookmarks/');
+            const response = await axiosInstance.get(`/api/bookmarks/?page=${page}`);
+
             setBookmarks(response.data.results);
-            setPaginationData(response.data);
+            setBookmarksPaginationData(response.data);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -176,12 +187,12 @@ const EditProfile = () => {
         }
     };
 
-    const fetchReadArticles = async () => {
+    const fetchReadArticles = async (page = 1) => {
         setLoadingData(true);
         try {
-            const response = await axiosInstance.get('/api/history/');
+            const response = await axiosInstance.get(`/api/history/?page=${page}`);
             setReadArticles(response.data.results);
-            setPaginationData(response.data);
+            setReadArticlePaginationData(response.data);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -251,6 +262,8 @@ const EditProfile = () => {
                     flexGrow: 1,
                     marginLeft: '150px',
                     paddingTop: 10,
+                    zIndex: 100,
+                    backgroundColor: (theme) => theme.palette.background.default
                 }}
             >
                 {selectedTab === 0 && (
@@ -345,7 +358,7 @@ const EditProfile = () => {
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <Grid container spacing={2} columns={12}>
                                         {bookmarks.map((bookmark, index) => (
-                                            <Grid size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(bookmark.article.id)}>
+                                            <Grid key={index} size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(bookmark.article.id)}>
                                                 <SyledCard
                                                 variant="outlined"
                                                 onFocus={() => handleFocus(0)}
@@ -381,6 +394,15 @@ const EditProfile = () => {
                                 No bookmarks found.
                             </Typography>
                         )}
+                        {bookmarksPaginationData && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                <Pagination
+                                    data={bookmarksPaginationData}
+                                    limit={pageLimit}
+                                    onPageChange={(page) => fetchBookmarks(page)}
+                                />
+                            </Box>
+                        )}
                     </>
                 )}
 
@@ -395,7 +417,7 @@ const EditProfile = () => {
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <Grid container spacing={2} columns={12}>
                                         {readArticles.map((article, index) => (
-                                            <Grid size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(article.article.id)}>
+                                            <Grid key={index} size={{ xs: 4, md: 3 }} onClick={() => handleCardClick(article.article.id)}>
                                                 <SyledCard
                                                 variant="outlined"
                                                 onFocus={() => handleFocus(0)}
@@ -431,18 +453,19 @@ const EditProfile = () => {
                                 No articles read yet.
                             </Typography>
                         )}
+                        {readArticlesPaginationData && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                <Pagination
+                                    data={readArticlesPaginationData}
+                                    limit={pageLimit}
+                                    onPageChange={(page) => fetchReadArticles(page)}
+                                />
+                            </Box>
+                        )}
                     </>
                 )}
             </Box>
-            {paginationData && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                    <Pagination
-                        data={paginationData}
-                        limit={10}
-                        onPageChange={(page) => fetchArticles(page)}
-                    />
-                </Box>
-            )}
+            
         </Container>
     );
 };
