@@ -168,7 +168,7 @@ export default function Signin({ open, handleClose }) {
                     </Button>
 
                     <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
-                        Don't have an account?{' '}
+                        Don`&apos;`t have an account?{' '}
                         <Button
                             variant="text"
                             color="primary"

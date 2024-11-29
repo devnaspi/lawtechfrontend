@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import VerificationSuccess from '@/app/components/VerificationSuccess';
-import VerificationFailed from '@/app/components/VerificationSuccess';
+import VerificationSuccess from '@/app/readers/components/VerificationSuccess';
+import VerificationFailed from '@/app/readers/components/VerificationSuccess';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Container, Dialog } from '@mui/material';
 

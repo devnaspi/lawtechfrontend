@@ -156,7 +156,7 @@ const ContractDetail = ({ params }) => {
                         />
                     ) : (
                         <Typography variant="body2" color="textSecondary">
-                            Fill the form and click "Save" to see a preview.
+                            Fill the form and click &quot;Save&quot; to see a preview.
                         </Typography>
                     )}
                     {downloadUrl && (

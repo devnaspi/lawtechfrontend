@@ -155,7 +155,7 @@ export default function Footer() {
                             Join the newsletter
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                            Subscribe for weekly updates. We won't spam you.
+                            Subscribe for weekly updates. We won`&apos;`t spam you.
                         </Typography>
                         <Stack direction="row" spacing={1} useFlexGap>
                             <InputLabel htmlFor="email-newsletter" sx={visuallyHidden}>
@@ -226,7 +226,7 @@ export default function Footer() {
                                 disabled={loading}
                                 sx={{ flexShrink: 0 }}
                             >                                
-                                {loading ? <span className='text-white'>'Subscribing...'</span> : <span>'Subscribe'</span>}
+                                {loading ? <span className='text-white'>`&apos;`Subscribing...`&apos;`</span> : <span>`&apos;`Subscribe`&apos;`</span>}
                             </Button>
                         </Stack>
                         {message && (

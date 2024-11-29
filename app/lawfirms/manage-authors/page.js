@@ -32,7 +32,7 @@ const ManageAuthors = () => {
     };
 
     fetchAuthors();
-  }, []);
+  }, [enqueueSnackbar]);
 
   const handleEditAuthor = (id) => {
     router.push(`/lawfirms/manage-authors/${id}`);
@@ -107,7 +107,7 @@ const ManageAuthors = () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete author "{selectedAuthor?.user?.username}"? This action cannot be undone.
+            Are you sure you want to delete author `&quot;`{selectedAuthor?.user?.username}`&quot;`? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
