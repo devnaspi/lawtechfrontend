@@ -21,7 +21,7 @@ export default function AuthorLayout({ children }) {
     const router = useRouter();
     const { auth, loading } = useAuth();
     const pathname = usePathname();
-    const noLayoutRoutes = ['/authors/signin', '/authors/signup'];
+    const noLayoutRoutes = ['/authors/signin', '/authors/signup', '/authors/forgot-password', '/authors/verify-otp', '/authors/reset-password'];
     const [authChecked, setAuthChecked] = useState(false);
     
 
@@ -76,12 +76,10 @@ export default function AuthorLayout({ children }) {
                 <div style={{ display: 'flex', minHeight: '100vh' }}>
                     {shouldShowLayout && (
                         <>
-                            {/* Sidebar */}
                             <div style={{ position: 'fixed', width: '250px', height: '100vh', top: 0, left: 0 }}>
                                 <AuthorSidebar />
                             </div>
 
-                            {/* Main content area */}
                             <main style={{ marginLeft: '250px', flexGrow: 1, padding: '20px', paddingTop: '0px'}}>
                                 {children}
                             </main>

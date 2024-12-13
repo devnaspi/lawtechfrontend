@@ -16,6 +16,8 @@ import { SnackbarProvider } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeProvider } from '@mui/material/styles';
 import createAppTheme from '../components/theme';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 
 export default function ClientLayout({ children }) {
@@ -26,8 +28,11 @@ export default function ClientLayout({ children }) {
 
     const [openSignInModal, setOpenSignInModal] = useState(false);
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
+    const [openForgotPasswordModal, setOpenForgotPasswordModal] = useState(false);
     const [openOTPModal, setOpenOTPModal] = useState(false);
+    const [openOTPModalForForgotPassword, setOpenOTPModalForForgotPassword] = useState(false);
     const [openCompleteRegistrationModal, setOpenCompleteRegistrationModal] = useState(false);
+    const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
     const [email, setEmail] = useState('');
     const [showAppBar, setShowAppBar] = useState(true);
 
@@ -58,18 +63,38 @@ export default function ClientLayout({ children }) {
         if (pathname === '/readers/login') {
             setOpenSignUpModal(false);
             setOpenSignInModal(true);
+            setOpenForgotPasswordModal(false);
             setOpenOTPModal(false);
+            setOpenResetPasswordModal(false); 
             setOpenCompleteRegistrationModal(false);
         } else if (pathname === '/readers/sign-up') {
             setOpenSignUpModal(true);
             setOpenSignInModal(false);
+            setOpenForgotPasswordModal(false);
+            setOpenOTPModal(false);
+            setOpenResetPasswordModal(false);
+            setOpenCompleteRegistrationModal(false);
+        } else if (pathname === '/readers/forgot-password') {
+            setOpenSignUpModal(false);
+            setOpenSignInModal(false);
             setOpenOTPModal(false);
             setOpenCompleteRegistrationModal(false);
+            setOpenForgotPasswordModal(true); 
+            setOpenResetPasswordModal(false); 
+        } else if (pathname === '/readers/reset-password') {
+            setOpenSignUpModal(false);
+            setOpenSignInModal(false);
+            setOpenForgotPasswordModal(false); 
+            setOpenOTPModal(false);
+            setOpenCompleteRegistrationModal(false);
+            setOpenResetPasswordModal(true); 
         } else {
             setOpenSignInModal(false);
             setOpenSignUpModal(false);
+            setOpenForgotPasswordModal(false);
             setOpenOTPModal(false);
             setOpenCompleteRegistrationModal(false);
+            setOpenResetPasswordModal(false);
         }
 
         setShowAppBar(pathname !== '/readers/profile');
@@ -86,7 +111,9 @@ export default function ClientLayout({ children }) {
         setOpenSignInModal(false);
         setOpenSignUpModal(false);
         setOpenOTPModal(false);
+        setOpenForgotPasswordModal(false)
         setOpenCompleteRegistrationModal(false);
+        setOpenResetPasswordModal(false)
         router.push('/readers/');
     };
 
@@ -94,6 +121,18 @@ export default function ClientLayout({ children }) {
         setEmail(verifiedEmail);
         setOpenOTPModal(false);
         setOpenCompleteRegistrationModal(true);
+    };
+
+    const handleOTPSuccessForForgotPassword = (verifiedEmail) => {
+        setEmail(verifiedEmail);
+        setOpenOTPModalForForgotPassword(false);
+        setOpenResetPasswordModal(true);
+    };
+
+    const handleForgotPasswordOtpSent = (verifiedEmail) => {
+        setEmail(verifiedEmail);
+        setOpenForgotPasswordModal(false);
+        setOpenOTPModalForForgotPassword(true);
     };
 
     const handleSignupSuccess = (userEmail) => {
@@ -116,9 +155,14 @@ export default function ClientLayout({ children }) {
                 <Footer />
 
                 <Signin open={openSignInModal} handleClose={handleCloseModals} />
+                
                 <Signup open={openSignUpModal} handleClose={handleCloseModals} onOTPSuccess={handleSignupSuccess} />
                 <OTPVerification open={openOTPModal} handleClose={handleCloseModals} email={email} onVerificationSuccess={handleOTPSuccess} />
                 <CompleteRegistration open={openCompleteRegistrationModal} handleClose={handleCloseModals} email={email} />
+
+                <ForgotPassword open={openForgotPasswordModal} handleClose={handleCloseModals} onOTPSuccess={handleForgotPasswordOtpSent} />
+                <OTPVerification open={openOTPModalForForgotPassword} handleClose={handleCloseModals} email={email} onVerificationSuccess={handleOTPSuccessForForgotPassword} />
+                <ResetPassword open={openResetPasswordModal} handleClose={handleCloseModals} email={email} />
 
                 <ProgressBar height="2px" color="green" options={{ showSpinner: false }} shallowRouting />
             </SnackbarProvider>
