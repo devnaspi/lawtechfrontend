@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
 import { useSnackbar } from 'notistack';
+import { usePathname, useRouter } from 'next/navigation';
 
 
 const AuthContext = createContext();
@@ -11,6 +12,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const { handleApiError } = useApiErrorHandler();
     const { enqueueSnackbar } = useSnackbar();
+    const router = useRouter();
+    const pathname = usePathname();
 
     const [auth, setAuth] = useState({
         token: null,
@@ -20,6 +23,32 @@ export const AuthProvider = ({ children }) => {
         error: null
     });
     const [loading, setLoading] = useState(true);
+
+    const urlProfileTypeMap = {
+        '/readers': 'client',
+        '/authors': 'author',
+        '/lawfirms': 'lawfirm',
+        '/admin': 'admin'
+    };
+
+    const validateProfileTypeWithURL = (profileType) => {
+        const matchingUrlPrefix = Object.entries(urlProfileTypeMap)
+            .find(([_, type]) => type === profileType)?.[0];
+
+        if (!matchingUrlPrefix) return true;
+
+        // Check if the current pathname starts with the matching URL prefix
+        const isValidURL = pathname.startsWith(matchingUrlPrefix);
+
+        if (!isValidURL) {
+            // Logout if the URL doesn't match the profile type
+            enqueueSnackbar("Invalid access. Redirecting to login.", { variant: 'error' });
+            logout();
+            return false;
+        }
+
+        return true;
+    };
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -59,15 +88,18 @@ export const AuthProvider = ({ children }) => {
                 },
             });
     
-            setAuth({
-                token,
-                user: response.data,
-                isAuthenticated: true,
-                profileType,
-            });
+            // Validate profile type against current URL before setting auth
+            if (validateProfileTypeWithURL(profileType)) {
+                setAuth({
+                    token,
+                    user: response.data,
+                    isAuthenticated: true,
+                    profileType,
+                });
     
-            localStorage.setItem('token', token);
-            localStorage.setItem('profileType', profileType);
+                localStorage.setItem('token', token);
+                localStorage.setItem('profileType', profileType);
+            }
     
         } catch (error) {
             handleApiError(error);
@@ -84,14 +116,12 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    };    
-
+    };  
 
     const login = async (token, profileType) => {
         await fetchProfile(token, profileType);
     };
     
-
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('profileType');
@@ -103,8 +133,18 @@ export const AuthProvider = ({ children }) => {
             isAuthenticated: false,
             profileType: null,
         }));
-    };
+        
+        const loginPaths = {
+            'client': '/readers/login',
+            'author': '/authors/login',
+            'lawfirm': '/lawfirms/login',
+            'admin': '/admin/login'
+        };
 
+        const loginPath = loginPaths[auth.profileType] || '/';
+        router.push(loginPath);
+    };
+    
     return (
         <AuthContext.Provider value={{ auth, setAuth, login, logout, loading }}>
             {children}

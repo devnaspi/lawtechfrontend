@@ -141,7 +141,7 @@ export default function LawfirmLogin() {
                 </Box>
 
                 <Typography variant="body2">
-                    Don`&apos;`t have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Button variant="text" onClick={() => router.push('/lawfirms/signup')}>
                         Register
                     </Button>

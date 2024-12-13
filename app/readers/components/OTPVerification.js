@@ -6,6 +6,7 @@ import { useSnackbar } from 'notistack';
 import axios from '@/lib/axios';
 import ReactCodeInput from 'react-code-input';
 import { useRouter } from 'next/navigation';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 export default function OTPVerification({ open, handleClose, email, onVerificationSuccess }) {
     const [otp, setOtp] = useState('');

@@ -58,7 +58,7 @@ export default function AuthorLogin() {
     };
 
     return (
-        <Container maxWidth="sm" sx={{'backgroundColor': 'white'}}>
+        <Container maxWidth="sm">
             <Box
                 sx={{
                     display: 'flex',
@@ -68,7 +68,7 @@ export default function AuthorLogin() {
                     gap: 2,
                 }}
             >
-                <Typography variant="h4" color={'black'} gutterBottom>
+                <Typography variant="h4" gutterBottom>
                     Login
                 </Typography>
 
