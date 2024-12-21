@@ -75,7 +75,7 @@ export default function MainContent() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <Grid container spacing={2} columns={12}>
                 {articles.map((article, index) => (
-                    <Grid key={article.id} item xs={12} sm={6} md={3} onClick={() => handleCardClick(article.id)}>
+                    <Grid key={article.code} item xs={12} sm={6} md={3} onClick={() => handleCardClick(article.code)}>
                         <StyledCard
                             variant="outlined"
                             onFocus={() => handleFocus(index)}

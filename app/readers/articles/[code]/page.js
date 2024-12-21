@@ -11,7 +11,7 @@ import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 const ArticleDetails = ({ params }) => {
     const router = useRouter();
-    const { id } = params;
+    const { code } = params;
     const [article, setArticle] = useState(null);
     const [similarArticles, setSimilarArticles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -23,16 +23,18 @@ const ArticleDetails = ({ params }) => {
     useEffect(() => {
         fetchArticle();
         fetchSimilarArticles();
-    }, [id]);
+    }, [code]);
 
     const fetchArticle = async () => {
         setLoading(true);
         try {
-            const response = await axiosInstance.get(`/api/articles/${id}`);
+            const response = await axiosInstance.get(`/api/articles/${code}`);
             setArticle(response.data);
             setIsBookmarked(response.data.is_bookmarked);
 
-            addToHistory(id);
+            if (article) {
+                addToHistory();
+            }
         } catch (error) {
             console.error('Failed to fetch article:', error);
         } finally {
@@ -42,16 +44,16 @@ const ArticleDetails = ({ params }) => {
 
     const fetchSimilarArticles = async () => {
         try {
-            const response = await axiosInstance.get(`/api/articles/${id}/read-more/?limit=4`);
+            const response = await axiosInstance.get(`/api/articles/${code}/read-more/?limit=4`);
             setSimilarArticles(response.data.results);
         } catch (error) {
             console.error('Failed to fetch similar articles:', error);
         }
     };
 
-    const addToHistory = async (articleId) => {
+    const addToHistory = async () => {
         try {
-            await axiosInstance.post('/api/history/', { article_id: articleId });
+            await axiosInstance.post('/api/history/', { article_id: article.id });
         } catch (error) {
             console.log(error)
             handleApiError(error)
@@ -60,15 +62,15 @@ const ArticleDetails = ({ params }) => {
 
     const handleBookmarkToggle = async () => {
         if (!auth.isAuthenticated) {
-            router.push(`/readers/login?redirect=/readers/articles/${id}`);
+            router.push(`/readers/login?redirect=/readers/articles/${code}`);
             return;
         }
 
         try {
             if (isBookmarked) {
-                await axiosInstance.post(`/api/articles/${id}/toggle-bookmark/`);
+                await axiosInstance.post(`/api/articles/${code}/toggle-bookmark/`);
             } else {
-                await axiosInstance.post(`/api/articles/${id}/toggle-bookmark/`);
+                await axiosInstance.post(`/api/articles/${code}/toggle-bookmark/`);
             }
             setIsBookmarked((prevState) => !prevState);
         } catch (error) {
@@ -169,7 +171,7 @@ const ArticleDetails = ({ params }) => {
                 </Typography>
                 <Grid container spacing={4}>
                     {similarArticles.map((article) => (
-                    <Grid item xs={6} sm={4} md={3} key={article.id}>
+                    <Grid item xs={6} sm={4} md={3} key={article.code}>
                         <Card
                         sx={{
                             cursor: 'pointer',
@@ -178,7 +180,7 @@ const ArticleDetails = ({ params }) => {
                             justifyContent: 'space-between',
                             height: '100%',
                         }}
-                        onClick={() => router.push(`/readers/articles/${article.id}`)}
+                        onClick={() => router.push(`/readers/articles/${article.code}`)}
                         >
                         <CardMedia
                             component="img"

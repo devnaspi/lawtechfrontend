@@ -30,6 +30,7 @@ const Pagination = ({ data, limit, onPageChange }) => {
                     <Button
                         key={i}
                         variant={i === currentPage ? 'contained' : 'outlined'}
+                        size="small"
                         onClick={() => handlePageChange(i)}
                     >
                         {i}
@@ -88,7 +89,12 @@ const Pagination = ({ data, limit, onPageChange }) => {
     };
 
     return (
-        <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center"
+        sx={{
+            flexWrap: 'wrap',
+            gap: { xs: 1, sm: 2 },
+            mt: { xs: 2, sm: 4 },
+        }}>
             {previous && (
                 <Button
                     variant="outlined"

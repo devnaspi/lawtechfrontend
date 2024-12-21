@@ -23,9 +23,16 @@ export default function AuthorLayout({ children }) {
     const pathname = usePathname();
     const noLayoutRoutes = ['/authors/signin', '/authors/signup', '/authors/forgot-password', '/authors/verify-otp', '/authors/reset-password'];
     const [authChecked, setAuthChecked] = useState(false);
-    
 
-    let shouldShowLayout = !noLayoutRoutes.includes(pathname);
+    const shouldHaveNoLayout = (path) => {
+        if (noLayoutRoutes.includes(path)) {
+            return true;
+        }
+        return path.startsWith('/authors/invitation/accept/');
+    };
+    
+    let shouldShowLayout = !shouldHaveNoLayout(pathname);
+
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -47,7 +54,7 @@ export default function AuthorLayout({ children }) {
 
     useEffect(() => {
         if (!loading) {
-            if (!auth.isAuthenticated && !noLayoutRoutes.includes(pathname)) {
+            if (!auth.isAuthenticated && !shouldHaveNoLayout(pathname)) {
                 router.push('/authors/signin');
             } else {
                 if (auth.isAuthenticated) {

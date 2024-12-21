@@ -123,7 +123,7 @@ const ContractsList = () => {
                             <Grid item xs={12} sm={6} md={4} key={contract.id}>
                                 <Card
                                     sx={{ cursor: 'pointer' }}
-                                    onClick={() => router.push(`/readers/contracts/${contract.id}`)}
+                                    onClick={() => router.push(`/readers/contracts/${contract.code}`)}
                                 >
                                     <CardContent>
                                         <Typography variant="h6" gutterBottom>
