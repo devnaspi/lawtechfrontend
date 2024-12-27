@@ -68,7 +68,7 @@ export default function AuthorForgotPassword() {
                         disabled={loading}
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        {loading ? 'Signing In...' : 'Sign In'}
+                        {loading ? 'Signing In...' : 'send otp'}
                     </Button>
 
                     <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
