@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Container, Autocomplete, Chip } from '@mui/material';
+import { Box, TextField, Button, Typography, Container, Autocomplete, Chip, MenuItem } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
@@ -14,25 +14,40 @@ export default function LawfirmSignup() {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [tags, setTags] = useState([]);
+    const [country, setCountry] = useState('Nigeria');
     const [existingTags, setExistingTags] = useState([]);
     const [loading, setLoading] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const router = useRouter();
     const { handleApiError } = useApiErrorHandler()
 
+    const [selectedRegion, setSelectedRegion] = useState('Africa');
+    const [regions, setRegions] = useState([]);
+    const [countries, setCountries] = useState([]);
+
+
     useEffect(() => {
         const fetchTags = async () => {
             try {
                 const response = await axiosInstance.get('/api/tags/');
-                console.log("Fetched tags:", response.data);
                 setExistingTags(response.data.results.map(tag => tag.name));
             } catch (error) {
                 handleApiError(error)
             }
         };
 
+        const fetchRegions = async () => {
+            const response = await axiosInstance.get('/api/categories/regions');
+            setRegions(response.data.results);
+        };
+
         fetchTags();
+        fetchRegions();
     }, []);
+
+    useEffect(() => {
+        fetchCountries()
+    }, [selectedRegion])
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -45,6 +60,7 @@ export default function LawfirmSignup() {
                 email,
                 name,
                 tags,
+                country
             });
 
             enqueueSnackbar('Registration successful!', { variant: 'success' });
@@ -55,6 +71,15 @@ export default function LawfirmSignup() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchCountries = async () => {
+        const response = await axiosInstance.get(`/api/categories/regions/${selectedRegion}/countries`);
+        setCountries(response.data);
+    }
+
+    const handleRegionInputChange = (e) => {
+        setSelectedRegion(e.target.value)
     };
 
     return (
@@ -107,6 +132,35 @@ export default function LawfirmSignup() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
+
+                    <TextField
+                        margin="normal"
+                        select
+                        label="Region"
+                        name="region"
+                        value={selectedRegion}
+                        onChange={handleRegionInputChange}
+                        required
+                        fullWidth
+                    >
+                        {regions.map((region) => (
+                            <MenuItem key={region.id} value={region.name}>{region.name}</MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        margin="normal"
+                        select
+                        label="Country"
+                        name="country"
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        required
+                        fullWidth
+                    >
+                        {countries.map((country) => (
+                            <MenuItem key={country.id} value={country.name}>{country.name}</MenuItem>
+                        ))}
+                    </TextField>
 
                     {/* Tags Input */}
                     <Autocomplete

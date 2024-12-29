@@ -15,7 +15,8 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import axios from '@/lib/axios';
+import axiosInstance from '@/lib/axios';
+
 import { useRouter } from 'next/navigation';
 
 
@@ -41,12 +42,12 @@ export default function CompleteRegistration({ open, handleClose, email }) {
 
     useEffect(() => {
         const fetchCategories = async () => {
-            const response = await axios.get('/api/categories/categories');
+            const response = await axiosInstance.get('/api/categories/categories');
             setCategories(response.data.results);
         };
 
         const fetchRegions = async () => {
-            const response = await axios.get('/api/categories/regions');
+            const response = await axiosInstance.get('/api/categories/regions');
             setRegions(response.data.results);
         };
 
@@ -54,14 +55,17 @@ export default function CompleteRegistration({ open, handleClose, email }) {
         fetchRegions();
     }, []);
 
-    const fetchCountries = async (region) => {
-        const response = await axios.get(`/api/categories/regions/${region}/countries`);
+    useEffect(() => {
+        fetchCountries()
+    }, [selectedRegion])
+
+    const fetchCountries = async () => {
+        const response = await axiosInstance.get(`/api/categories/regions/${selectedRegion}/countries`);
         setCountries(response.data);
     }
 
     const handleRegionInputChange = (e) => {
         setSelectedRegion(e.target.value)
-        fetchCountries(e.target.value)
     };
 
     const handleInputChange = (e) => {
@@ -71,7 +75,7 @@ export default function CompleteRegistration({ open, handleClose, email }) {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post('/api/users/register/', {
+            const response = await axiosInstance.post('/api/users/register/', {
                 ...formData,
                 email,
                 role: 'client',
