@@ -102,13 +102,13 @@ export default function Footer() {
                     textAlign: { xs: 'center', md: 'left' }, // Center on mobile
                     width: '100%',
                 }}>
-                    <Link display={'none'} color="text.secondary" variant="body2" href="/readers/#">
+                    <Link color="text.secondary" variant="body2" href="/privacy-policy.pdf" target="_blank">
                         Privacy Policy
                     </Link>
-                    {/* <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
+                    <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
                         &nbsp;•&nbsp;
-                    </Typography> */}
-                    <Link  display={'none'} color="text.secondary" variant="body2" href="/readers/#">
+                    </Typography>
+                    <Link color="text.secondary" variant="body2" href="/terms-and-conditions.pdf" target="_blank">
                         Terms of Service
                     </Link>
                     <Copyright />
@@ -237,7 +237,7 @@ export default function Footer() {
                                 disabled={loading}
                                 sx={{ flexShrink: 0 }}
                             >                                
-                                {loading ? <span className='text-white'>`&apos;`Subscribing...`&apos;`</span> : <span>`&apos;`Subscribe`&apos;`</span>}
+                                {loading ? <span className='text-white'>`&apos;`Subscribing...`&apos;`</span> : <span>Subscribe</span>}
                             </Button>
                         </Stack>
                         {message && (

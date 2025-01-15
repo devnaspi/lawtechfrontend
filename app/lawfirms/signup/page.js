@@ -13,6 +13,7 @@ export default function LawfirmSignup() {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
+    const [website, setWebsite] = useState('');
     const [tags, setTags] = useState([]);
     const [country, setCountry] = useState('Nigeria');
     const [existingTags, setExistingTags] = useState([]);
@@ -60,7 +61,8 @@ export default function LawfirmSignup() {
                 email,
                 name,
                 tags,
-                country
+                country,
+                website
             });
 
             enqueueSnackbar('Registration successful!', { variant: 'success' });
@@ -131,6 +133,14 @@ export default function LawfirmSignup() {
                         label="Lawfirm Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Website"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
                     />
 
                     <TextField

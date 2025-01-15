@@ -202,18 +202,6 @@ const ArticleDetails = ({ params }) => {
                             <Typography variant="subtitle1" gutterBottom>
                                 {article.title}
                             </Typography>
-                            <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                sx={{
-                                    display: '-webkit-box',
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    WebkitLineClamp: 2,
-                                    textOverflow: 'ellipsis',
-                                }}
-                                dangerouslySetInnerHTML={{ __html: article.content }}
-                            />
                         </CardContent>
                         </Card>
                     </Grid>
