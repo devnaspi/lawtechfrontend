@@ -24,7 +24,7 @@ function Author({ authors, created_at, company }) {
                 }}
             >
                 <Avatar
-                    src={company?.logo}
+                    src={company?.logo || undefined}
                     alt={company?.name}
                     variant="rounded"
                     sx={{
@@ -35,7 +35,9 @@ function Author({ authors, created_at, company }) {
                         borderColor: 'divider',
                         '& img': {
                             objectFit: 'contain',
-                            p: 0.5
+                            p: 0,
+                            width: '100%',
+                            height: '100%'
                         },
                         '& .fallback-icon': {
                             width: 14,
@@ -103,7 +105,7 @@ Author.propTypes = {
     created_at: PropTypes.string.isRequired,
     company: PropTypes.shape({
         name: PropTypes.string.isRequired,
-        logo: PropTypes.string.isRequired,
+        logo: PropTypes.string,
     }),
 };
 

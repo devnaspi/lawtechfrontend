@@ -124,7 +124,7 @@ export default function MainContent() {
                             created_at={article.created_at} 
                             company={{
                                 name: article.author.lawfirm.name,
-                                logo: article.author.lawfirm.user?.profile_picture
+                                logo: article.author.lawfirm.logo
                             }}
                             />
                         </StyledCard>
