@@ -239,7 +239,7 @@ const ArticleDetails = ({ params }) => {
                         fontWeight: 500
                     }}
                 >
-                    Contributing Authors
+                    Contributing Author(s)
                 </Typography>
                 <Stack spacing={2}>
                     {Array.isArray(article.authors) ? article.authors.map((author, index) => (

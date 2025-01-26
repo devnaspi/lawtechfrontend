@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Container, Autocomplete, Chip, MenuItem } from '@mui/material';
+import { Box, TextField, Button, Typography, Container, Autocomplete, Chip, MenuItem, Avatar } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
-
+import { Building2 } from 'lucide-react';
 
 export default function LawfirmSignup() {
     const [username, setUsername] = useState('');
@@ -25,7 +25,8 @@ export default function LawfirmSignup() {
     const [selectedRegion, setSelectedRegion] = useState('Africa');
     const [regions, setRegions] = useState([]);
     const [countries, setCountries] = useState([]);
-
+    const [logo, setLogo] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
 
     useEffect(() => {
         const fetchTags = async () => {
@@ -54,22 +55,32 @@ export default function LawfirmSignup() {
         event.preventDefault();
         setLoading(true);
 
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        formData.append('email', email);
+        formData.append('name', name);
+        formData.append('website', website);
+        formData.append('country', country);
+        tags.forEach(tag => formData.append('tags', tag));
+        if (logo) {
+            formData.append('logo', logo);
+        }
+
         try {
-            const registrationResponse = await axiosInstance.post('/api/lawfirms/register/new/', {
-                username,
-                password,
-                email,
-                name,
-                tags,
-                country,
-                website
-            });
+            const registrationResponse = await axiosInstance.post('/api/lawfirms/register/new/', 
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
 
             enqueueSnackbar('Registration successful!', { variant: 'success' });
-
             router.push('/lawfirms/signin');
         } catch (error) {
-            handleApiError(error)
+            handleApiError(error);
         } finally {
             setLoading(false);
         }
@@ -82,6 +93,15 @@ export default function LawfirmSignup() {
 
     const handleRegionInputChange = (e) => {
         setSelectedRegion(e.target.value)
+    };
+
+    const handleLogoChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setLogo(file);
+            const previewUrl = URL.createObjectURL(file);
+            setLogoPreview(previewUrl);
+        }
     };
 
     return (
@@ -100,6 +120,50 @@ export default function LawfirmSignup() {
                 </Typography>
 
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+                    {/* Logo Upload Section */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 2,
+                            mb: 3
+                        }}
+                    >
+                        <Avatar
+                            src={logoPreview}
+                            variant="rounded"
+                            sx={{
+                                width: 100,
+                                height: 100,
+                                bgcolor: 'background.paper',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                '& img': {
+                                    objectFit: 'contain',
+                                    p: 0,
+                                    width: '100%',
+                                    height: '100%'
+                                }
+                            }}
+                        >
+                            <Building2 size={40} />
+                        </Avatar>
+                        <Button
+                            variant="outlined"
+                            component="label"
+                            sx={{ mt: 1 }}
+                        >
+                            Upload Logo
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={handleLogoChange}
+                            />
+                        </Button>
+                    </Box>
+
                     <TextField
                         margin="normal"
                         required
