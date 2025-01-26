@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Container, Box, Typography, Grid, Card, CardContent, CardMedia, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
 import axiosInstance from '@/lib/axios';
 import StyledTypography from '../components/StyledTypography';
+import Author from '../components/Author';
 
 const Explore = () => {
     const [selectedCategory, setSelectedCategory] = useState('Any');
@@ -137,7 +138,7 @@ const Explore = () => {
                                         component="img"
                                         image={article.cover_picture}
                                         alt={article.title}
-                                        sx={{ height: 140, objectFit: 'cover' }}
+                                        sx={{ height: 220, objectFit: 'cover' }}
                                     />
                                     <CardContent>
                                         <Typography variant="subtitle1" gutterBottom>
@@ -150,6 +151,14 @@ const Explore = () => {
                                         />
                                         
                                     </CardContent>
+                                    <Author 
+                                    authors={[article.author]} 
+                                    created_at={article.created_at} 
+                                    company={{
+                                        name: article.author.lawfirm.name,
+                                        logo: article.author.lawfirm.user?.profile_picture
+                                    }}
+                                    />
                                 </Card>
                             </Grid>
                         ))

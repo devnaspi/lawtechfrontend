@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Container } from '@mui/material';
+import { Box, TextField, Button, Typography, Container, Link } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
@@ -118,6 +118,16 @@ export default function LawfirmLogin() {
                         }, }}
                     />
 
+                    <Link
+                            variant="body2"
+                            color="primary"
+                            align='right'
+                            className='pointer'
+                            onClick={() => router.push('/lawfirms/forgot-password')}
+                        >
+                            Forgot Password?
+                    </Link>
+
                     <Button
                         type="submit"
                         fullWidth
@@ -131,7 +141,7 @@ export default function LawfirmLogin() {
                 </Box>
 
                 <Typography variant="body2">
-                    Don`&apos;`t have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Button variant="text" onClick={() => router.push('/lawfirms/signup')}>
                         Register
                     </Button>

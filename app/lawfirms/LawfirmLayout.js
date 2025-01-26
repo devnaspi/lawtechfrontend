@@ -21,7 +21,7 @@ export default function LawfirmLayout({ children }) {
     const router = useRouter();
     const { auth, loading } = useAuth();
     const pathname = usePathname();
-    const noLayoutRoutes = ['/lawfirms/signin', '/lawfirms/signup'];
+    const noLayoutRoutes = ['/lawfirms/signin', '/lawfirms/signup', '/lawfirms/forgot-password', '/lawfirms/verify-otp', '/lawfirms/reset-password'];
     const [authChecked, setAuthChecked] = useState(false);
 
     let shouldShowLayout = !noLayoutRoutes.includes(pathname);

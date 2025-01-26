@@ -89,31 +89,39 @@ export default function Footer() {
             <Container
                 sx={{
                     display: 'flex',
-                    flexDirection: 'row',
+                    flexDirection: { xs: 'column', md: 'row' },
                     justifyContent: 'space-between',
                     alignItems: 'start',
                     pb: { xs: 8, sm: 10 },
                     pt: { xs: 4, sm: 6 },
-                    textAlign: { sm: 'center', md: 'left' },
+                    textAlign: { xs: 'center', md: 'left' },
                 }}
             >
-                <div>
-                    <Link display={'none'} color="text.secondary" variant="body2" href="/readers/#">
+                <Box sx={{
+                    mt: { xs: 4, md: 0 }, // Add margin-top for mobile
+                    textAlign: { xs: 'center', md: 'left' }, // Center on mobile
+                    width: '100%',
+                }}>
+                    <Link color="text.secondary" variant="body2" href="/privacy-policy.pdf" target="_blank">
                         Privacy Policy
                     </Link>
-                    {/* <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
+                    <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
                         &nbsp;•&nbsp;
-                    </Typography> */}
-                    <Link  display={'none'} color="text.secondary" variant="body2" href="/readers/#">
+                    </Typography>
+                    <Link color="text.secondary" variant="body2" href="/terms-and-conditions.pdf" target="_blank">
                         Terms of Service
                     </Link>
                     <Copyright />
-                </div>
+                </Box>
                 <Stack
                     direction="row"
                     spacing={1}
                     useFlexGap
-                    sx={{ justifyContent: 'left', color: 'text.secondary', display: 'none' }}
+                    sx={{ 
+                        justifyContent: 'left', 
+                        color: 'text.secondary', 
+                        display: 'none',
+                        mt: { xs: 2, md: 0 }, }}
                 >
                     <IconButton
                         color="inherit"
@@ -146,7 +154,10 @@ export default function Footer() {
 
                 {/* Show Newsletter Subscription only if user is not authenticated */}
                 {!auth.isAuthenticated && (
-                    <Box>
+                    <Box sx={{
+                            mt: { xs: 4, md: 0 }, // Add margin-top for mobile
+                            textAlign: { xs: 'center', md: 'left' }, // Center on mobile
+                        }}>
                         <Typography
                             variant="body2"
                             gutterBottom
@@ -155,7 +166,7 @@ export default function Footer() {
                             Join the newsletter
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                            Subscribe for weekly updates. We won`&apos;`t spam you.
+                            Subscribe for weekly updates. We won&apos;t spam you.
                         </Typography>
                         <Stack direction="row" spacing={1} useFlexGap>
                             <InputLabel htmlFor="email-newsletter" sx={visuallyHidden}>
@@ -226,7 +237,7 @@ export default function Footer() {
                                 disabled={loading}
                                 sx={{ flexShrink: 0 }}
                             >                                
-                                {loading ? <span className='text-white'>`&apos;`Subscribing...`&apos;`</span> : <span>`&apos;`Subscribe`&apos;`</span>}
+                                {loading ? <span className='text-white'>`&apos;`Subscribing...`&apos;`</span> : <span>Subscribe</span>}
                             </Button>
                         </Stack>
                         {message && (

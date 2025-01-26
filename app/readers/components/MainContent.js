@@ -39,6 +39,20 @@ const StyledCardContent = styled(CardContent)({
     flexGrow: 1,
 });
 
+const CompanyInfo = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    padding: '0 10px 8px 10px',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const CompanyLogo = styled('img')({
+    width: 24,
+    height: 24,
+    objectFit: 'contain',
+});
+
 export default function MainContent() {
     const router = useRouter();
     const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
@@ -73,9 +87,9 @@ export default function MainContent() {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <Grid container spacing={2} columns={12}>
+            <Grid container spacing={2} columns={12} >
                 {articles.map((article, index) => (
-                    <Grid key={article.id} item xs={12} sm={6} md={3} onClick={() => handleCardClick(article.id)}>
+                    <Grid key={article.code} mt={1} item xs={12} sm={6} md={3} onClick={() => handleCardClick(article.code)}>
                         <StyledCard
                             variant="outlined"
                             onFocus={() => handleFocus(index)}
@@ -87,6 +101,7 @@ export default function MainContent() {
                                 component="img"
                                 alt="cover"
                                 image={article.cover_picture}
+                                height={220}
                                 sx={{
                                     borderBottom: '1px solid',
                                     borderColor: 'divider',
@@ -96,9 +111,22 @@ export default function MainContent() {
                                 <Typography gutterBottom variant="h6" color="text.primary" component="div">
                                     {article.title}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary" gutterBottom dangerouslySetInnerHTML={{ __html: article.content }} />
+                                <Typography variant="body2" color="text.secondary" gutterBottom dangerouslySetInnerHTML={{ __html: article.content }} 
+                                style={{
+                                    display: '-webkit-box',
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    WebkitLineClamp: 2,
+                                }}/>
                             </StyledCardContent>
-                            <Author authors={[article.author]} created_at={article.created_at} />
+                            <Author  
+                            authors={[article.author]} 
+                            created_at={article.created_at} 
+                            company={{
+                                name: article.author.lawfirm.name,
+                                logo: article.author.lawfirm.logo
+                            }}
+                            />
                         </StyledCard>
                     </Grid>
                 ))}

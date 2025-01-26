@@ -206,7 +206,6 @@ const EditProfile = () => {
 
             logout();
             enqueueSnackbar('Logout successful!', { variant: 'success' });
-            router.push('/readers');
         } catch (err) {
             handleApiError(err);
         }

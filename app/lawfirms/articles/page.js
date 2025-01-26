@@ -13,20 +13,20 @@ const LawFirmArticles = () => {
     const router = useRouter();
     const [paginationData, setPaginationData] = useState(null);
 
-
+    const fetchArticles = async (page = 1) => {
+        try {
+            const response = await axiosInstance.get(`/api/lawfirms/articles/?page=${page}`);
+            setArticles(response.data);
+            console.log(response)
+            setPaginationData(response.data);
+        } catch (error) {
+            console.error('Error fetching articles:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
     useEffect(() => {
-        const fetchArticles = async () => {
-            try {
-                const response = await axiosInstance.get('/api/lawfirms/articles/');
-                setArticles(response.data);
-                setPaginationData(response.data);
-            } catch (error) {
-                console.error('Error fetching articles:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchArticles();
     }, []);
 

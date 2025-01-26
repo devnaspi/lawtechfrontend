@@ -15,13 +15,16 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import axios from '@/lib/axios';
+import axiosInstance from '@/lib/axios';
+
 import { useRouter } from 'next/navigation';
 
 
 export default function CompleteRegistration({ open, handleClose, email }) {
     const [categories, setCategories] = useState([]);
+    const [selectedRegion, setSelectedRegion] = useState('Africa');
     const [regions, setRegions] = useState([]);
+    const [countries, setCountries] = useState([]);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const { handleApiError } = useApiErrorHandler();
@@ -31,7 +34,7 @@ export default function CompleteRegistration({ open, handleClose, email }) {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        region: '',
+        country: '',
         areaOfLaw: ''
     });
 
@@ -39,18 +42,31 @@ export default function CompleteRegistration({ open, handleClose, email }) {
 
     useEffect(() => {
         const fetchCategories = async () => {
-            const response = await axios.get('/api/categories/categories');
+            const response = await axiosInstance.get('/api/categories/categories');
             setCategories(response.data.results);
         };
 
         const fetchRegions = async () => {
-            const response = await axios.get('/api/categories/regions');
+            const response = await axiosInstance.get('/api/categories/regions');
             setRegions(response.data.results);
         };
 
         fetchCategories();
         fetchRegions();
     }, []);
+
+    useEffect(() => {
+        fetchCountries()
+    }, [selectedRegion])
+
+    const fetchCountries = async () => {
+        const response = await axiosInstance.get(`/api/categories/regions/${selectedRegion}/countries`);
+        setCountries(response.data);
+    }
+
+    const handleRegionInputChange = (e) => {
+        setSelectedRegion(e.target.value)
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -59,7 +75,7 @@ export default function CompleteRegistration({ open, handleClose, email }) {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.post('/api/users/register/', {
+            const response = await axiosInstance.post('/api/users/register/', {
                 ...formData,
                 email,
                 role: 'client',
@@ -108,13 +124,26 @@ export default function CompleteRegistration({ open, handleClose, email }) {
                         select
                         label="Region"
                         name="region"
-                        value={formData.region}
-                        onChange={handleInputChange}
+                        value={selectedRegion}
+                        onChange={handleRegionInputChange}
                         required
                         fullWidth
                     >
                         {regions.map((region) => (
                             <MenuItem key={region.id} value={region.name}>{region.name}</MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        select
+                        label="Country"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        required
+                        fullWidth
+                    >
+                        {countries.map((country) => (
+                            <MenuItem key={country.id} value={country.name}>{country.name}</MenuItem>
                         ))}
                     </TextField>
                     <TextField

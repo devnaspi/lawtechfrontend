@@ -6,10 +6,12 @@ import { useSnackbar } from 'notistack';
 import axios from '@/lib/axios';
 import ReactCodeInput from 'react-code-input';
 import { useRouter } from 'next/navigation';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 export default function OTPVerification({ open, handleClose, email, onVerificationSuccess }) {
     const [otp, setOtp] = useState('');
     const { enqueueSnackbar } = useSnackbar();
+    const { handleApiError, loading } = useApiErrorHandler();
 
     const handleVerifyOTP = async () => {
         try {
@@ -19,7 +21,7 @@ export default function OTPVerification({ open, handleClose, email, onVerificati
                 onVerificationSuccess(email)
             }
         } catch (error) {
-            enqueueSnackbar('Invalid or expired OTP. Please try again.', { variant: 'error' });
+            handleApiError(error)
         }
     };
 

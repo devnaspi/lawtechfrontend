@@ -7,6 +7,7 @@ import axiosInstance from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import Pagination from '@/app/components/Pagination';
+import EmptyState from '@/app/components/EmptyState';
 
 const ManageAuthors = () => {
   const [authors, setAuthors] = useState([]);
@@ -75,32 +76,39 @@ const ManageAuthors = () => {
         Manage Authors
       </Typography>
 
-      <Grid container spacing={4}>
-        {authors.map((author) => (
-          <Grid item xs={12} sm={6} md={4} key={author.id}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{author.user.username}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Email: {author.user.email}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Specialties: {author.tags.map(tag => tag).join(', ')}
-                </Typography>
+      {authors.length === 0 ? (
+        <EmptyState
+          message="No authors yet" 
+          description="Start by inviting your first author to the law firm"
+        />
+      ) : (
+        <Grid container spacing={4}>
+          {authors.map((author) => (
+            <Grid item xs={12} sm={6} md={4} key={author.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{author.user.username}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Email: {author.user.email}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Specialties: {author.tags.map(tag => tag).join(', ')}
+                  </Typography>
 
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                  <IconButton color="primary" onClick={() => handleEditAuthor(author.id)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton color="error" onClick={() => handleOpenDeleteDialog(author)}>
-                    <Delete />
-                  </IconButton>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+                    <IconButton color="primary" onClick={() => handleEditAuthor(author.id)}>
+                      <Edit />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => handleOpenDeleteDialog(author)}>
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>

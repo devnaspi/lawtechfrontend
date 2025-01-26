@@ -14,7 +14,7 @@ const ContractDetail = ({ params }) => {
     const [validationError, setValidationError] = useState(null);
     const [downloadUrl, setDownloadUrl] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
-    const contractId = params.id;
+    const contractCode = params.code;
     const theme = useTheme()
     const { handleApiError } = useApiErrorHandler();
 
@@ -22,7 +22,7 @@ const ContractDetail = ({ params }) => {
     useEffect(() => {
         const fetchContractDetails = async () => {
             try {
-                const response = await axiosInstance.get(`/api/contracts/${contractId}`);
+                const response = await axiosInstance.get(`/api/contracts/${contractCode}`);
                 const data = response.data;
                 setContract(data);
 
@@ -40,7 +40,7 @@ const ContractDetail = ({ params }) => {
         };
 
         fetchContractDetails();
-    }, [contractId]);
+    }, [contractCode]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -61,7 +61,7 @@ const ContractDetail = ({ params }) => {
         setValidationError(null);
 
         try {
-            const response = await axiosInstance.post(`/api/contracts/${contractId}/generate`, {
+            const response = await axiosInstance.post(`/api/contracts/${contractCode}/generate`, {
                 field_values: formData
             });
 
@@ -70,8 +70,6 @@ const ContractDetail = ({ params }) => {
             setPreviewUrl(response.data.preview_url);
         } catch (err) {
             // handleApiError(err);
-            console.log('id is ', contractId)
-
             console.error('Error generating contract:', err);
         }
     };

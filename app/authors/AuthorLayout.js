@@ -21,11 +21,18 @@ export default function AuthorLayout({ children }) {
     const router = useRouter();
     const { auth, loading } = useAuth();
     const pathname = usePathname();
-    const noLayoutRoutes = ['/authors/signin', '/authors/signup'];
+    const noLayoutRoutes = ['/authors/signin', '/authors/signup', '/authors/forgot-password', '/authors/verify-otp', '/authors/reset-password'];
     const [authChecked, setAuthChecked] = useState(false);
-    
 
-    let shouldShowLayout = !noLayoutRoutes.includes(pathname);
+    const shouldHaveNoLayout = (path) => {
+        if (noLayoutRoutes.includes(path)) {
+            return true;
+        }
+        return path.startsWith('/authors/invitation/accept/');
+    };
+    
+    let shouldShowLayout = !shouldHaveNoLayout(pathname);
+
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -47,7 +54,7 @@ export default function AuthorLayout({ children }) {
 
     useEffect(() => {
         if (!loading) {
-            if (!auth.isAuthenticated && !noLayoutRoutes.includes(pathname)) {
+            if (!auth.isAuthenticated && !shouldHaveNoLayout(pathname)) {
                 router.push('/authors/signin');
             } else {
                 if (auth.isAuthenticated) {
@@ -76,12 +83,10 @@ export default function AuthorLayout({ children }) {
                 <div style={{ display: 'flex', minHeight: '100vh' }}>
                     {shouldShowLayout && (
                         <>
-                            {/* Sidebar */}
                             <div style={{ position: 'fixed', width: '250px', height: '100vh', top: 0, left: 0 }}>
                                 <AuthorSidebar />
                             </div>
 
-                            {/* Main content area */}
                             <main style={{ marginLeft: '250px', flexGrow: 1, padding: '20px', paddingTop: '0px'}}>
                                 {children}
                             </main>

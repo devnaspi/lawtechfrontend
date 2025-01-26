@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography, IconButton, InputAdornment } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Box, TextField, Button, Typography, IconButton, InputAdornment, Link } from '@mui/material';
 import axiosInstance from '@/lib/axios';
 import CloseIcon from '@mui/icons-material/Close';
 import Visibility from '@mui/icons-material/Visibility';
@@ -157,6 +157,15 @@ export default function Signin({ open, handleClose }) {
                             ),
                         }}
                     />
+                    <Link
+                            variant="body2"
+                            color="primary"
+                            align='right'
+                            className='pointer'
+                            onClick={() => router.push('/readers/forgot-password')}
+                        >
+                            Forgot Password?
+                    </Link>
                     <Button
                         variant="contained"
                         color="primary"
@@ -167,16 +176,23 @@ export default function Signin({ open, handleClose }) {
                         {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
 
-                    <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
-                        Don`&apos;`t have an account?{' '}
-                        <Button
-                            variant="text"
-                            color="primary"
-                            onClick={() => router.push('/readers/sign-up')}
-                        >
-                            Register
-                        </Button>
-                    </Typography>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        mt: 2 
+                    }}>
+                        <Typography variant="body2">
+                            Don&apos;t have an account?{' '}
+                            <Button
+                                variant="text"
+                                color="primary"
+                                onClick={() => router.push('/readers/sign-up')}
+                            >
+                                Register
+                            </Button>
+                        </Typography>
+                    </Box>
                 </Box>
             </DialogContent>
         </Dialog>
