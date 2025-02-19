@@ -21,7 +21,7 @@ const Explore = () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.get('/api/categories/categories');
+            const response = await axiosInstance.get('/api/tags');
             const results = response.data.results;
             setCategories(results);
         } catch (error) {
@@ -50,7 +50,7 @@ const Explore = () => {
 
         try {
             const params = {
-                category: selectedCategory !== 'Any' ? selectedCategory : undefined,
+                tag: selectedCategory !== 'Any' ? selectedCategory : undefined,
                 country: selectedCountry !== 'Any' ? selectedCountry : undefined,
             };
             
