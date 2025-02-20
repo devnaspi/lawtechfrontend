@@ -10,8 +10,8 @@ import Author from '../components/Author';
 const Explore = () => {
     const [selectedCategory, setSelectedCategory] = useState('Any');
     const [categories, setCategories] = useState([]);
-    const [regions, setRegions] = useState([]);
-    const [selectedRegion, setSelectedRegion] = useState('Any');
+    const [countries, setCountries] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState('Any');
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [noResults, setNoResults] = useState(false);
@@ -21,7 +21,7 @@ const Explore = () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.get('/api/categories/categories');
+            const response = await axiosInstance.get('/api/tags');
             const results = response.data.results;
             setCategories(results);
         } catch (error) {
@@ -30,15 +30,15 @@ const Explore = () => {
         setLoading(false);
     };
     
-    const fetchRegions = async () => {
+    const fetchCountries = async () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.get('/api/categories/regions');
-            const results = response.data.results;
-            setRegions(results);
+            const response = await axiosInstance.get('/api/categories/countries');
+            const results = response.data;
+            setCountries(results);
         } catch (error) {
-            console.error("Error fetching regions:", error);
+            console.error("Error fetching countries:", error);
         }
         setLoading(false);
     };
@@ -50,8 +50,8 @@ const Explore = () => {
 
         try {
             const params = {
-                category: selectedCategory !== 'Any' ? selectedCategory : undefined,
-                region: selectedRegion !== 'Any' ? selectedRegion : undefined,
+                tag: selectedCategory !== 'Any' ? selectedCategory : undefined,
+                country: selectedCountry !== 'Any' ? selectedCountry : undefined,
             };
             
             const response = await axiosInstance.get('/api/articles/', { params });
@@ -70,9 +70,9 @@ const Explore = () => {
 
     useEffect(() => {
         fetchCategories();
-        fetchRegions();
+        fetchCountries();
         fetchArticles();
-    }, [selectedCategory, selectedRegion]);
+    }, [selectedCategory, selectedCountry]);
 
     return (
         <Container maxWidth="lg" sx={{ mt: 20, mb: 4, minHeight: '70vh' }}>
@@ -100,15 +100,15 @@ const Explore = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                     <FormControl fullWidth>
-                        <InputLabel>Region</InputLabel>
+                        <InputLabel>Country</InputLabel>
                         <Select
-                            value={selectedRegion}
-                            onChange={(e) => setSelectedRegion(e.target.value)}
+                            value={selectedCountry}
+                            onChange={(e) => setSelectedCountry(e.target.value)}
                         >
                             <MenuItem value="Any">Any</MenuItem>
-                            {regions.map((region) => (
-                                <MenuItem key={region.id} value={region.name} sx={{ textTransform: 'capitalize' }}>
-                                    {region.name}
+                            {countries.map((country) => (
+                                <MenuItem key={country.id} value={country.name} sx={{ textTransform: 'capitalize' }}>
+                                    {country.name}
                                 </MenuItem>
                             ))}
                         </Select>
