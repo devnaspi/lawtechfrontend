@@ -26,22 +26,25 @@ const ArticleDetails = ({ params }) => {
         fetchSimilarArticles();
     }, [code]);
 
+    useEffect(() => {
+        if (article?.id) {
+            addToHistory(article.id);
+        }
+    }, [article]);
+
     const fetchArticle = async () => {
         setLoading(true);
         try {
             const response = await axiosInstance.get(`/api/articles/${code}`);
             setArticle(response.data);
             setIsBookmarked(response.data.is_bookmarked);
-
-            if (article) {
-                addToHistory();
-            }
         } catch (error) {
             console.error('Failed to fetch article:', error);
         } finally {
             setLoading(false);
         }
     };
+    
 
     const fetchSimilarArticles = async () => {
         try {
@@ -52,9 +55,10 @@ const ArticleDetails = ({ params }) => {
         }
     };
 
-    const addToHistory = async () => {
+    const addToHistory = async (articleId) => {
         try {
-            await axiosInstance.post('/api/history/', { article_id: article.id });
+            console.log('')
+            await axiosInstance.post('/api/history/', { article_id: articleId });
         } catch (error) {
             console.log(error)
             handleApiError(error)

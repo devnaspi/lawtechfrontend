@@ -14,29 +14,34 @@ const CreateArticle = () => {
     title: '',
     content: '',
     tags: [],
-    categories: [],
-    regions: [],
+    contributingAuthors: [],  // NEW
+    countries: [],
     coverPhoto: null,
   });
+  
   
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [availableTags, setAvailableTags] = useState([]);
-  const [availableCategories, setAvailableCategories] = useState([]);
-  const [availableRegions, setAvailableRegions] = useState([]);
+  const [availableCountries, setAvailableCountries] = useState([]);
+
+
+  const [availableAuthors, setAvailableAuthors] = useState([]);
+
   const theme = useTheme();
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const tagsResponse = await axiosInstance.get('/api/tags');
-        const categoriesResponse = await axiosInstance.get('/api/categories/categories');
-        const regionsResponse = await axiosInstance.get('/api/categories/regions');
+        const authorsResponse = await axiosInstance.get('/api/authors');
+        const countriesResponse = await axiosInstance.get('/api/categories/countries');
         
         setAvailableTags(tagsResponse.data.results);
-        setAvailableCategories(categoriesResponse.data.results);
-        setAvailableRegions(regionsResponse.data.results);
+        setAvailableCountries(countriesResponse.data);
+
+        setAvailableAuthors(Array.isArray(authorsResponse.data.results) ? authorsResponse.data.results : []);
       } catch (error) {
         console.error('Failed to fetch options:', error);
         enqueueSnackbar('Failed to load options. Please try again.', { variant: 'error' });
@@ -59,8 +64,11 @@ const CreateArticle = () => {
     formData.append('content', updatedArticleData.content);
     
     updatedArticleData.tags.forEach(tag => formData.append('tags[]', tag));
-    updatedArticleData.categories.forEach(category => formData.append('categories[]', category));
-    updatedArticleData.regions.forEach(region => formData.append('regions[]', region));
+    updatedArticleData.countries.forEach(region => formData.append('countries[]', region));
+
+    updatedArticleData.contributingAuthors.forEach(author =>
+      formData.append('contributing_authors_ids[]', author.id)
+    );
 
     if (updatedArticleData.coverPhoto) {
       formData.append('cover_picture', updatedArticleData.coverPhoto);
@@ -73,7 +81,6 @@ const CreateArticle = () => {
       });
 
       enqueueSnackbar('Article created successfully!', { variant: 'success' });
-      console.log('Article saved successfully:', response.data);
     } catch (error) {
       console.error('Failed to create article:', error);
       enqueueSnackbar('Failed to create article. Please try again.', { variant: 'error' });
@@ -180,20 +187,21 @@ const CreateArticle = () => {
         <Grid item xs={12} md={4}>
           <Autocomplete
             multiple
-            options={availableCategories.map((category) => category.name)}
-            value={articleData.categories}
-            onChange={(event, newValue) => setArticleData({ ...articleData, categories: newValue })}
+            options={availableAuthors}
+            getOptionLabel={(option) => option.user.username}
+            value={articleData.contributingAuthors}
+            onChange={(event, newValue) => setArticleData({ ...articleData, contributingAuthors: newValue })}
             renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
+              value.map((author, index) => (
                 <Chip
                   variant="outlined"
-                  label={option}
+                  label={author.user.username}
                   {...getTagProps({ index })}
-                  key={option}
+                  key={author.id}
                 />
               ))
             }
-            renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Contributing Authors" variant="outlined" />}
             sx={{ mt: 4, mb: 4, '& .MuiOutlinedInput-root': {
               '& fieldset': {
                 borderColor: theme.palette.primary.main,
@@ -214,9 +222,9 @@ const CreateArticle = () => {
         <Grid item xs={12} md={4}>
           <Autocomplete
             multiple
-            options={availableRegions.map((region) => region.name)}
-            value={articleData.regions}
-            onChange={(event, newValue) => setArticleData({ ...articleData, regions: newValue })}
+            options={availableCountries.map((region) => region.name)}
+            value={articleData.countries}
+            onChange={(event, newValue) => setArticleData({ ...articleData, countries: newValue })}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip
@@ -227,7 +235,7 @@ const CreateArticle = () => {
                 />
               ))
             }
-            renderInput={(params) => <TextField {...params} label="Regions" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Countries" variant="outlined" />}
             sx={{ mt: 4, mb: 4, '& .MuiOutlinedInput-root': {
               '& fieldset': {
                 borderColor: theme.palette.primary.main,

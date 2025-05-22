@@ -11,6 +11,7 @@ import LawFirmSidebar from './components/LawFirmSidebar';
 import { ThemeProvider } from '@mui/material/styles';
 import createAppTheme from '../components/theme';
 import { CssBaseline } from '@mui/material';
+import LawFirmHeader from './components/LawFirmHeader';
 
 
 export default function LawfirmLayout({ children }) {
@@ -77,13 +78,25 @@ export default function LawfirmLayout({ children }) {
                     {shouldShowLayout && (
                         <>
                             {/* Sidebar */}
-                            <div style={{ position: 'fixed', width: '250px', height: '100vh', top: 0, left: 0 }}>
+                            <div style={{ position: 'fixed', width: '250px',  top: 0, left: 0 }}>
                                 <LawFirmSidebar />
                             </div>
 
                             {/* Main content area */}
-                            <main style={{ marginLeft: '250px', flexGrow: 1, padding: '20px', paddingTop: '0px'}}>
-                                {children}
+                            <main style={{ marginLeft: '250px', flexGrow: 1, paddingTop: '0px'}}>
+                                <div style={{ 
+                                    position: 'fixed', 
+                                    top: 0, 
+                                    left: '250px', 
+                                    width: 'calc(100% - 250px)', 
+                                    zIndex: 1100 // ensure it's above other content
+                                    }}>                                    
+                                    <LawFirmHeader key={Date.now()} />
+                                </div>
+
+                                <Box sx={{ px: 1, py: 6 }}>
+                                    {children}
+                                </Box>
                             </main>
                         </>
                     )}

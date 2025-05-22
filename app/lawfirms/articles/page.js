@@ -16,8 +16,7 @@ const LawFirmArticles = () => {
     const fetchArticles = async (page = 1) => {
         try {
             const response = await axiosInstance.get(`/api/lawfirms/articles/?page=${page}`);
-            setArticles(response.data);
-            console.log(response)
+            setArticles(response.data.results);
             setPaginationData(response.data);
         } catch (error) {
             console.error('Error fetching articles:', error);
