@@ -51,7 +51,13 @@ const ContractDetail = ({ params }) => {
     };
 
     const handleSave = async () => {
-        const isFormValid = Object.keys(formData).every(key => formData[key].trim() !== '');
+        const isFormValid = Object.keys(formData).every((key) => {
+            const value = formData[key];
+            if (Array.isArray(value)) {
+              return value.every((item) => item.trim() !== '');
+            }
+            return typeof value === 'string' && value.trim() !== '';
+        });          
 
         if (!isFormValid) {
             setValidationError('Please fill in all required fields before generating the preview.');
@@ -104,9 +110,46 @@ const ContractDetail = ({ params }) => {
                         </Alert>
                     )}
                     <Box component="form">
-                        {contract?.fields.map((field) => (
+                    {contract?.fields.map((field) => (
+                        <Box key={field.field_name} sx={{ mb: 2 }}>
+                            {field.field_type === 'list' ? (
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                {field.field_name.replace('_', ' ')} (List)
+                                </Typography>
+                                {(formData[field.field_name] || ['']).map((item, index) => (
+                                <TextField
+                                    key={index}
+                                    label={`Item ${index + 1}`}
+                                    fullWidth
+                                    margin="dense"
+                                    value={item}
+                                    onChange={(e) => {
+                                    const newList = [...(formData[field.field_name] || [])];
+                                    newList[index] = e.target.value;
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        [field.field_name]: newList,
+                                    }));
+                                    }}
+                                    sx={{ mb: 1 }}
+                                />
+                                ))}
+                                <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() =>
+                                    setFormData((prev) => ({
+                                    ...prev,
+                                    [field.field_name]: [...(prev[field.field_name] || []), ''],
+                                    }))
+                                }
+                                >
+                                + Add Item
+                                </Button>
+                            </Box>
+                            ) : (
                             <TextField
-                                key={field.field_name}
                                 label={field.field_name.replace('_', ' ')}
                                 name={field.field_name}
                                 type={field.field_type}
@@ -115,22 +158,27 @@ const ContractDetail = ({ params }) => {
                                 required
                                 value={formData[field.field_name] || ''}
                                 onChange={handleInputChange}
-                                sx={{ '& .MuiOutlinedInput-root': {
+                                sx={{
+                                '& .MuiOutlinedInput-root': {
                                     '& fieldset': {
-                                      borderColor: theme.palette.primary.main,
+                                    borderColor: theme.palette.primary.main,
                                     },
                                     '&:hover fieldset': {
-                                      borderColor: theme.palette.primary.main,
+                                    borderColor: theme.palette.primary.main,
                                     },
                                     '&.Mui-focused fieldset': {
-                                      borderColor: theme.palette.primary.main,
+                                    borderColor: theme.palette.primary.main,
                                     },
-                                  },
-                                  '& input': {
+                                },
+                                '& input': {
                                     color: theme.palette.text.primary,
-                                }, }}
+                                },
+                                }}
                             />
+                            )}
+                        </Box>
                         ))}
+
                         <Button variant="contained" onClick={handleSave} sx={{ mt: 2 }}>
                             Generate Contract
                         </Button>

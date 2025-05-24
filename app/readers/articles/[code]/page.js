@@ -44,7 +44,6 @@ const ArticleDetails = ({ params }) => {
             setLoading(false);
         }
     };
-    
 
     const fetchSimilarArticles = async () => {
         try {

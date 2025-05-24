@@ -1,11 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Grid, Card, CardContent, Button, CircularProgress, Box } from '@mui/material';
+import {
+    Container,
+    Typography,
+    Grid,
+    Card,
+    CardContent,
+    Button,
+    CircularProgress,
+    Box,
+    Chip,
+} from '@mui/material';
 import axiosInstance from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import Pagination from '@/app/components/Pagination';
-
 
 const ContractsPage = () => {
     const router = useRouter();
@@ -13,19 +22,20 @@ const ContractsPage = () => {
     const [loading, setLoading] = useState(true);
     const [paginationData, setPaginationData] = useState(null);
 
-    useEffect(() => {
-        const fetchContracts = async () => {
-            try {
-                const response = await axiosInstance.get('/api/contracts/');
-                setContracts(response.data.results);
-                setPaginationData(response.data);
-            } catch (error) {
-                console.error('Failed to fetch contracts:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchContracts = async (page = 1) => {
+        setLoading(true);
+        try {
+            const response = await axiosInstance.get(`/api/contracts/?page=${page}`);
+            setContracts(response.data.results);
+            setPaginationData(response.data);
+        } catch (error) {
+            console.error('Failed to fetch contracts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchContracts();
     }, []);
 
@@ -42,7 +52,7 @@ const ContractsPage = () => {
             <Typography variant="h4" gutterBottom>
                 Contracts
             </Typography>
-            
+
             <Button
                 variant="contained"
                 color="primary"
@@ -56,9 +66,34 @@ const ContractsPage = () => {
                 {contracts.length > 0 ? (
                     contracts.map((contract) => (
                         <Grid item xs={12} sm={6} md={4} key={contract.id}>
-                            <Card onClick={() => router.push(`/admin/contracts/${contract.id}`)} sx={{ cursor: 'pointer' }}>
+                            <Card
+                                onClick={() => router.push(`/admin/contracts/${contract.code}`)}
+                                sx={{ cursor: 'pointer' }}
+                            >
                                 <CardContent>
-                                    <Typography variant="h6">{contract.name}</Typography>
+                                    <Typography variant="h6" gutterBottom>
+                                        {contract.name}
+                                    </Typography>
+
+                                    {/* Tags */}
+                                    {contract.tags && contract.tags.length > 0 && (
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                mt: 1,
+                                                gap: 0.5,
+                                            }}
+                                        >
+                                            {contract.tags.map((tag, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    label={tag}
+                                                    size="small"
+                                                />
+                                            ))}
+                                        </Box>
+                                    )}
                                 </CardContent>
                             </Card>
                         </Grid>
@@ -79,12 +114,13 @@ const ContractsPage = () => {
                     </Box>
                 )}
             </Grid>
+
             {paginationData && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                     <Pagination
                         data={paginationData}
                         limit={10}
-                        onPageChange={(page) => fetchArticles(page)}
+                        onPageChange={(page) => fetchContracts(page)}
                     />
                 </Box>
             )}

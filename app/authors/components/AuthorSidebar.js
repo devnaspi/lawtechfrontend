@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Tabs, Tab, Button, Box } from '@mui/material';
+import { Box, ListItemButton, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import { useRouter, usePathname } from 'next/navigation';
+import { Dashboard, Create, Article, AccountCircle, Logout } from '@mui/icons-material';
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
@@ -15,25 +16,22 @@ const AuthorSidebar = () => {
   const { handleApiError } = useApiErrorHandler();
   const { logout } = useAuth();
 
-  const [selectedTab, setSelectedTab] = useState(0);
-
   const routes = [
-    '/authors/dashboard', 
-    '/authors/create-article', 
-    '/authors/manage-articles', 
-    '/authors/profile'
+    { path: '/authors/dashboard', label: 'Dashboard', icon: <Dashboard /> },
+    { path: '/authors/create-article', label: 'Create Article', icon: <Create /> },
+    { path: '/authors/manage-articles', label: 'Manage Articles', icon: <Article /> },
+    { path: '/authors/profile', label: 'Manage Profile', icon: <AccountCircle /> }
   ];
 
+  const [activeRoute, setActiveRoute] = useState('');
+
   useEffect(() => {
-    const currentRoute = routes.indexOf(pathname);
-    if (currentRoute !== -1) {
-      setSelectedTab(currentRoute);
-    }
+    setActiveRoute(pathname);
   }, [pathname]);
 
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
-    router.push(routes[newValue]);
+  const handleNavigation = (path) => {
+    setActiveRoute(path);
+    router.push(path);
   };
 
   const handleLogout = async () => {
@@ -50,47 +48,57 @@ const AuthorSidebar = () => {
   return (
     <Box 
       sx={{ 
+        width: 250, 
+        height: '100vh', 
+        backgroundColor: '#1E1E1E', 
+        color: '#fff', 
         display: 'flex', 
         flexDirection: 'column', 
-        height: '100vh', 
-        backgroundColor: '#f5f5f5', 
-        borderColor: 'divider', 
-        pt: 3,
+        justifyContent: 'space-between' 
       }}
     >
-      <Tabs
-        orientation="vertical"
-        value={selectedTab}
-        onChange={handleTabChange}
-        sx={{
-          width: '100%',
-          flexGrow: 1,
-          '& .MuiTab-root': {
-            textAlign: 'left',
-            color: 'info.main',
-          },
-          '& .Mui-selected': {
-            color: 'info.main',
-            borderLeft: '4px solid',
-            borderColor: 'info.main',
-          },
-        }}
-      >
-        <Tab label="Dashboard" />
-        <Tab label="Create Article" />
-        <Tab label="Manage Articles" />
-        <Tab label="Manage Profile" />
-      </Tabs>
+      {/* Top section: Logo + Nav */}
+      <Box>
+        {/* Logo / Brand */}
+        <Box sx={{ p: 3, display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.svg" alt="Praelex Logo" style={{ height: 32, marginRight: 8 }} />
+          <Typography variant="h6" fontWeight="bold" color="white">Praelex</Typography>
+        </Box>
 
-      <Button
-        color="error"
-        variant="text"
-        size="small"
-        sx={{ m: 2 }}
-        onClick={handleLogout}
-      >
-        Logout
-      </Button>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+
+        {/* Navigation */}
+        <Box>
+          {routes.map((route, index) => (
+            <ListItemButton
+              key={index}
+              onClick={() => handleNavigation(route.path)}
+              sx={{
+                color: '#fff',
+                backgroundColor: activeRoute === route.path ? '#2A2A2A' : 'transparent',
+                '&:hover': { backgroundColor: '#333' },
+                px: 3,
+              }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                {route.icon}
+              </ListItemIcon>
+              <ListItemText primary={route.label} />
+            </ListItemButton>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Bottom section: Logout */}
+      <Box>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+        <ListItemButton onClick={handleLogout} sx={{ color: '#fff', px: 3, py: 2 }}>
+          <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText primary="Log out" />
+        </ListItemButton>
+      </Box>
     </Box>
   );
 };
