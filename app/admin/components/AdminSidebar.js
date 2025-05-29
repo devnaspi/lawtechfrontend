@@ -18,8 +18,8 @@ const AdminSidebar = () => {
 
   const routes = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: <Dashboard /> },
-    { path: '/admin/contracts', label: 'Contracts', icon: <Description /> },
     { path: '/admin/contracts/create', label: 'Create Contract', icon: <AddBox /> },
+    { path: '/admin/contracts', label: 'Manage Contracts', icon: <Description /> },
     { path: '/admin/activity/logs', label: 'Activity Logs', icon: <History /> },
   ];
 

@@ -35,7 +35,7 @@ const CreateContract = () => {
     fields: [{ field_name: '', field_type: 'text', options: [] }],
     body: '',
     tags: [],
-    lawfirm: null, // null = Praelex Intelligence
+    lawfirm_id: null,
   });
 
   useEffect(() => {
@@ -135,13 +135,12 @@ const CreateContract = () => {
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Owning Law Firm</InputLabel>
         <Select
-          value={contractData.lawfirm || ''}
+          value={contractData.lawfirm_id || ''}
           label="Owning Law Firm"
           onChange={(e) =>
-            setContractData({ ...contractData, lawfirm: e.target.value === '' ? null : parseInt(e.target.value) })
+            setContractData({ ...contractData, lawfirm_id: e.target.value === '' ? null : parseInt(e.target.value) })
           }
         >
-          <MenuItem value="">Praelex Intelligence</MenuItem>
           {availableLawFirms.map((firm) => (
             <MenuItem key={firm.id} value={firm.id}>
               {firm.name} ({firm.user?.email})

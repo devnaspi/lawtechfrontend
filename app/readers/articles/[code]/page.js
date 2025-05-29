@@ -9,6 +9,7 @@ import axiosInstance from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
 import { Building2 } from 'lucide-react';
+import Link from 'next/link';
 
 const ArticleDetails = ({ params }) => {
     const router = useRouter();
@@ -214,20 +215,19 @@ const ArticleDetails = ({ params }) => {
                         }}
                     >
                         To learn more, contact{' '}
-                        <Typography
-                            component="a"
-                            href={`${article.author.lawfirm.website || ''}`}
-                            target="_blank"
-                            sx={{
+                        <Link href={`/readers/explore/lawfirms/${article.author.lawfirm.id}`} passHref>
+                            <Typography
+                                component="span"
+                                sx={{
                                 textDecoration: 'underline',
                                 color: 'primary.main',
-                                '&:hover': {
-                                    color: 'primary.dark',
-                                }
-                            }}
-                        >
-                            {article.author.lawfirm.name}
-                        </Typography>
+                                cursor: 'pointer',
+                                '&:hover': { color: 'primary.dark' },
+                                }}
+                            >
+                                {article.author.lawfirm.name}
+                            </Typography>
+                        </Link>
                         {' '}here.
                     </Typography>
                 </Paper>

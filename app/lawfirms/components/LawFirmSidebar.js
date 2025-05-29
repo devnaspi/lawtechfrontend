@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, ListItemButton, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import { useRouter, usePathname } from 'next/navigation';
-import { Dashboard, PersonAdd, Group, Article, Logout } from '@mui/icons-material';
+import { Dashboard, PersonAdd, Group, Article, Logout, Description } from '@mui/icons-material';
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
@@ -20,7 +20,8 @@ const LawFirmSidebar = () => {
     { path: '/lawfirms/dashboard', label: 'Dashboard', icon: <Dashboard /> },
     { path: '/lawfirms/add-author', label: 'Add Author', icon: <PersonAdd /> },
     { path: '/lawfirms/manage-authors', label: 'Manage Authors', icon: <Group /> },
-    { path: '/lawfirms/articles', label: 'Articles', icon: <Article /> }
+    { path: '/lawfirms/articles', label: 'Articles', icon: <Article /> },
+    { path: '/lawfirms/contracts', label: 'Contracts', icon: <Description /> },
   ];
 
   const [activeRoute, setActiveRoute] = useState('');

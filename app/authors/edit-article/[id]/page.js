@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Box, TextField, Typography, Autocomplete, Chip, CircularProgress } from '@mui/material';
+import {
+  Container, Box, TextField, Typography, Autocomplete, Chip, CircularProgress
+} from '@mui/material';
 import TextEditor from '../../../components/TextEditor';
 import { useRouter, useParams } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
@@ -12,13 +14,13 @@ const EditArticle = () => {
     title: '',
     content: '',
     tags: [],
-    categories: [],
     countries: [],
+    contributingAuthors: [],
   });
 
   const [availableTags, setAvailableTags] = useState([]);
-  const [availableCategories, setAvailableCategories] = useState([]);
   const [availableCountries, setAvailableCountries] = useState([]);
+  const [availableAuthors, setAvailableAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { id } = useParams();
@@ -28,29 +30,25 @@ const EditArticle = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch article
         const articleRes = await axiosInstance.get(`/api/articles/${id}/`);
         const article = articleRes.data;
 
-        // Fetch options
-        const [tagsRes, categoriesRes, countriesRes] = await Promise.all([
+        const [tagsRes, countriesRes, authorsRes] = await Promise.all([
           axiosInstance.get('/api/tags/'),
-          axiosInstance.get('/api/categories/categories/'),
-          axiosInstance.get('/api/categories/countries/')
+          axiosInstance.get('/api/categories/countries/'),
+          axiosInstance.get('/api/authors/colleagues/')
         ]);
 
-        // Set available options
         setAvailableTags(tagsRes.data.results.map(tag => tag.name));
-        setAvailableCategories(categoriesRes.data.results.map(cat => cat.name));
         setAvailableCountries(countriesRes.data.map(c => c.name));
+        setAvailableAuthors(authorsRes.data); // Full object
 
-        // Set initial form values
         setArticleData({
           title: article.title,
           content: article.content,
-          tags: article.tags.map(t => t.name || t), // fallback for strings
-          categories: article.categories.map(c => c.name || c),
+          tags: article.tags.map(t => t.name || t),
           countries: article.countries.map(r => r.name || r),
+          contributingAuthors: article.contributing_authors || [], // assuming backend returns this field
         });
 
       } catch (error) {
@@ -72,6 +70,7 @@ const EditArticle = () => {
       const updatedArticleData = {
         ...articleData,
         content: noteDetails.html,
+        contributing_authors_ids: articleData.contributingAuthors.map(a => a.id),
       };
 
       await axiosInstance.put(`/api/articles/${id}/`, updatedArticleData);
@@ -118,21 +117,6 @@ const EditArticle = () => {
         sx={{ mb: 4 }}
       />
 
-      {/* Categories */}
-      <Autocomplete
-        multiple
-        options={availableCategories}
-        value={articleData.categories}
-        onChange={(e, newVal) => handleInputChange('categories', newVal)}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip key={option} label={option} {...getTagProps({ index })} />
-          ))
-        }
-        renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
-        sx={{ mb: 4 }}
-      />
-
       {/* Countries */}
       <Autocomplete
         multiple
@@ -145,6 +129,22 @@ const EditArticle = () => {
           ))
         }
         renderInput={(params) => <TextField {...params} label="Countries" variant="outlined" />}
+        sx={{ mb: 4 }}
+      />
+
+      {/* Contributing Authors */}
+      <Autocomplete
+        multiple
+        options={availableAuthors}
+        getOptionLabel={(option) => option.user?.username || ''}
+        value={articleData.contributingAuthors}
+        onChange={(e, newVal) => handleInputChange('contributingAuthors', newVal)}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip key={option.id} label={option.user?.username || ''} {...getTagProps({ index })} />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} label="Contributing Authors" variant="outlined" />}
         sx={{ mb: 4 }}
       />
 

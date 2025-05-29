@@ -19,7 +19,7 @@ const Dashboard = () => {
     return (
         <Container maxWidth="lg" sx={{ mt: 20, mb: 4 }}>
             <Typography variant="h4" gutterBottom>
-                Author Dashboard
+                Admin Dashboard
             </Typography>
 
             <Grid container spacing={4}>

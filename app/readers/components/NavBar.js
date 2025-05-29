@@ -47,7 +47,7 @@ function NavBar() {
                         <Button
                             variant="text"
                             size="small"
-                            aria-label="LAWTECH"
+                            aria-label="PRAELEX"
                             component="a"
                             href="/readers/"
                             sx={{
@@ -55,7 +55,8 @@ function NavBar() {
                                 display: { xs: 'none', sm: 'flex' }
                             }}
                         >
-                            <Typography fontWeight={'800'}>LAWTECH</Typography>
+                            <img src="/logo.svg" alt="Praelex Logo" style={{ height: 32, marginRight: 8 }} />
+                            <Typography variant="h6" fontWeight="bold">PRAELEX</Typography>
                         </Button>
 
                         <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>

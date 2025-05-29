@@ -35,7 +35,7 @@ const CreateArticle = () => {
     const fetchOptions = async () => {
       try {
         const tagsResponse = await axiosInstance.get('/api/tags');
-        const authorsResponse = await axiosInstance.get('/api/authors');
+        const authorsResponse = await axiosInstance.get('/api/authors/colleagues');
         const countriesResponse = await axiosInstance.get('/api/categories/countries');
         
         setAvailableTags(tagsResponse.data.results);

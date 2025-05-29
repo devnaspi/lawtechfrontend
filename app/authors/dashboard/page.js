@@ -34,8 +34,8 @@ const Dashboard = () => {
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             {/* Title */}
-            <Typography variant="h4" gutterBottom>
-                Author Dashboard
+            <Typography variant="h4" gutterBottom mb={5}>
+                Welcome back,
             </Typography>
 
             {/* Metrics Cards */}

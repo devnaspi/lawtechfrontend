@@ -34,7 +34,7 @@ const EditContractPage = () => {
     fields: [{ field_name: '', field_type: 'text', options: [] }],
     body: '',
     tags: [],
-    lawfirm: null,
+    lawfirm_id: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ const EditContractPage = () => {
           })),
           body: data.body,
           tags: data.tags,
-          lawfirm: data.lawfirm,
+          lawfirm_id: data.lawfirm.id,
         });
       } catch (error) {
         console.error('Failed to fetch contract or options:', error);
@@ -131,9 +131,9 @@ const EditContractPage = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
-      </Container>
+      </Box>
     );
   }
 
@@ -153,13 +153,12 @@ const EditContractPage = () => {
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Owning Law Firm</InputLabel>
         <Select
-          value={contractData.lawfirm || ''}
+          value={contractData.lawfirm_id || ''}
           label="Owning Law Firm"
           onChange={(e) =>
-            setContractData({ ...contractData, lawfirm: e.target.value === '' ? null : parseInt(e.target.value) })
+            setContractData({ ...contractData, lawfirm_id: e.target.value === '' ? null : parseInt(e.target.value) })
           }
         >
-          <MenuItem value="">Praelex Intelligence</MenuItem>
           {availableLawFirms.map((firm) => (
             <MenuItem key={firm.id} value={firm.id}>
               {firm.name} ({firm.user?.email})
