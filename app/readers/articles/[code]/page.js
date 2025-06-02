@@ -245,7 +245,24 @@ const ArticleDetails = ({ params }) => {
                     Contributing Author(s)
                 </Typography>
                 <Stack spacing={2}>
-                    {Array.isArray(article.authors) ? article.authors.map((author, index) => (
+                    <Box 
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2
+                        }}
+                    >
+                        <Avatar
+                            src={article.author.avatar}
+                            alt={article.author.user.username}
+                            sx={{ width: 40, height: 40 }}
+                        />
+                        <Typography variant="body1">
+                            {article.author.user.username}
+                        </Typography>
+                    </Box>
+                    
+                    {Array.isArray(article.contributing_authors) && article.contributing_authors.map((author, index) => (
                         <Box 
                             key={index}
                             sx={{
@@ -263,24 +280,7 @@ const ArticleDetails = ({ params }) => {
                                 {author.user.username}
                             </Typography>
                         </Box>
-                    )) : (
-                        <Box 
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2
-                            }}
-                        >
-                            <Avatar
-                                src={article.author.avatar}
-                                alt={article.author.user.username}
-                                sx={{ width: 40, height: 40 }}
-                            />
-                            <Typography variant="body1">
-                                {article.author.user.username}
-                            </Typography>
-                        </Box>
-                    )}
+                    ))}
                 </Stack>
             </Paper>
 

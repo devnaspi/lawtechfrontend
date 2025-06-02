@@ -7,8 +7,8 @@ import LawfirmLayout from './LawfirmLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-    title: 'Law Firm Portal - Law Tech',
-    description: 'Manage authors, contracts, and more on Law Tech',
+    title: 'Law Firm Portal - Praelex Intel',
+    description: 'Manage authors, contracts, and more on Praelex Intel',
 };
 
 export default function RootLayout({ children }) {

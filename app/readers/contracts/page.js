@@ -132,7 +132,7 @@ const ContractsList = () => {
 
                                         {contract.lawfirm?.name && (
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                                By <strong>{contract.lawfirm.name}</strong>
+                                                Drafted by <strong>{contract.lawfirm.name}</strong>
                                             </Typography>
                                         )}
 
