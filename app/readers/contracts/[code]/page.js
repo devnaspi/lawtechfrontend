@@ -186,7 +186,7 @@ const ContractDetail = ({ params }) => {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                    <Typography variant="h5" gutterBottom>
+                    {/* <Typography variant="h5" gutterBottom>
                         Contract Preview
                     </Typography>
                     {previewUrl ? (
@@ -204,7 +204,7 @@ const ContractDetail = ({ params }) => {
                         <Typography variant="body2" color="textSecondary">
                             Fill the form and click &quot;Save&quot; to see a preview.
                         </Typography>
-                    )}
+                    )} */}
                     {downloadUrl && (
                         <Button variant="outlined" sx={{ mt: 2 }} href={downloadUrl} download>
                             Download Contract
