@@ -1,54 +1,86 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container, TextField, Button, Typography, Box, IconButton, CircularProgress } from '@mui/material';
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  IconButton,
+  CircularProgress,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Autocomplete,
+  Chip,
+} from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import TextEditor from '@/app/components/TextEditor';
 import axiosInstance from '@/lib/axios';
 import { useRouter, useParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import useApiErrorHandler from '@/utils/useApiErrorHandler';
 
 const EditContractPage = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const { handleApiError } = useApiErrorHandler();
   const router = useRouter();
   const { id } = useParams();
+
   const [contractData, setContractData] = useState({
     name: '',
-    fields: [{ fieldName: '', fieldType: 'text', options: [] }],
+    fields: [{ field_name: '', field_type: 'text', options: [] }],
     body: '',
+    tags: [],
+    lawfirm_id: null,
   });
+
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [availableLawFirms, setAvailableLawFirms] = useState([]);
 
   useEffect(() => {
-    const fetchContract = async () => {
+    const fetchContractAndOptions = async () => {
       try {
-        const response = await axiosInstance.get(`/api/contracts/${id}`);
-        const data = response.data;
+        const [contractRes, tagsRes, lawfirmsRes] = await Promise.all([
+          axiosInstance.get(`/api/contracts/${id}`),
+          axiosInstance.get('/api/tags'),
+          axiosInstance.get('/api/lawfirms'),
+        ]);
+
+        const data = contractRes.data;
+        setAvailableTags(tagsRes.data.results.map((tag) => tag.name));
+        setAvailableLawFirms(lawfirmsRes.data.results);
+
         setContractData({
           name: data.name,
           fields: data.fields.map((field) => ({
-            fieldName: field.field_name,
-            fieldType: field.field_type,
+            field_name: field.field_name,
+            field_type: field.field_type,
             options: field.options || [],
           })),
           body: data.body,
+          tags: data.tags,
+          lawfirm_id: data.lawfirm.id,
         });
       } catch (error) {
-        console.error('Failed to fetch contract:', error);
+        console.error('Failed to fetch contract or options:', error);
         enqueueSnackbar('Failed to fetch contract details.', { variant: 'error' });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchContract();
+    fetchContractAndOptions();
   }, [id, enqueueSnackbar]);
 
   const handleFieldChange = (index, field, value) => {
     const updatedFields = [...contractData.fields];
     updatedFields[index][field] = value;
-    if (field === 'fieldType' && value !== 'options') {
+    if (field === 'field_type' && value !== 'options') {
       updatedFields[index].options = [];
     }
     setContractData({ ...contractData, fields: updatedFields });
@@ -57,7 +89,7 @@ const EditContractPage = () => {
   const handleAddField = () => {
     setContractData({
       ...contractData,
-      fields: [...contractData.fields, { fieldName: '', fieldType: 'text', options: [] }],
+      fields: [...contractData.fields, { field_name: '', field_type: 'text', options: [] }],
     });
   };
 
@@ -81,20 +113,12 @@ const EditContractPage = () => {
 
   const handleSaveContract = async (noteDetails) => {
     setSaveLoading(true);
-
-    const updatedContractData = {
-      name: contractData.name,
+    const payload = {
+      ...contractData,
       body: noteDetails.html,
-      fields: contractData.fields.map((field) => ({
-        field_name: field.fieldName,
-        field_type: field.fieldType,
-        options: field.options,
-      })),
-      tags: ['law', 'criminal'],
     };
-
     try {
-      await axiosInstance.put(`/api/contracts/${id}`, updatedContractData);
+      await axiosInstance.put(`/api/contracts/${id}`, payload);
       enqueueSnackbar('Contract updated successfully!', { variant: 'success' });
       router.push('/admin/contracts');
     } catch (error) {
@@ -107,22 +131,15 @@ const EditContractPage = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
-      </Container>
+      </Box>
     );
   }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Edit Contract
-      </Typography>
-
-      <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-        Use the text editor below to modify the contract body. Insert placeholders by wrapping field names in double curly braces like 
-        <code> {'{{field_name}}'} </code>. These placeholders will be dynamically replaced with the values provided by the client.
-      </Typography>
+      <Typography variant="h4" gutterBottom>Edit Contract</Typography>
 
       <TextField
         label="Contract Name"
@@ -133,35 +150,66 @@ const EditContractPage = () => {
         sx={{ mb: 3 }}
       />
 
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>Owning Law Firm</InputLabel>
+        <Select
+          value={contractData.lawfirm_id || ''}
+          label="Owning Law Firm"
+          onChange={(e) =>
+            setContractData({ ...contractData, lawfirm_id: e.target.value === '' ? null : parseInt(e.target.value) })
+          }
+        >
+          {availableLawFirms.map((firm) => (
+            <MenuItem key={firm.id} value={firm.id}>
+              {firm.name} ({firm.user?.email})
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Autocomplete
+        multiple
+        freeSolo
+        options={availableTags}
+        value={contractData.tags}
+        onChange={(e, newValue) => setContractData({ ...contractData, tags: newValue })}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip variant="outlined" label={option} {...getTagProps({ index })} key={option} />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
+        sx={{ mb: 4 }}
+      />
+
       {contractData.fields.map((field, index) => (
-        <Box key={index} sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box key={index} sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
             <TextField
               label="Field Name"
               variant="outlined"
-              value={field.fieldName}
-              onChange={(e) => handleFieldChange(index, 'fieldName', e.target.value)}
-              sx={{ flex: 1 }}
+              value={field.field_name}
+              onChange={(e) => handleFieldChange(index, 'field_name', e.target.value)}
+              fullWidth
             />
-            <TextField
-              select
-              label="Field Type"
-              variant="outlined"
-              value={field.fieldType}
-              onChange={(e) => handleFieldChange(index, 'fieldType', e.target.value)}
-              sx={{ width: '150px' }}
-              SelectProps={{ native: true }}
-            >
-              <option value="text">Text</option>
-              <option value="number">Number</option>
-              <option value="date">Date</option>
-              <option value="options">Options</option>
-            </TextField>
+            <FormControl sx={{ minWidth: 140 }}>
+              <InputLabel>Field Type</InputLabel>
+              <Select
+                value={field.field_type}
+                onChange={(e) => handleFieldChange(index, 'field_type', e.target.value)}
+                label="Field Type"
+              >
+                <MenuItem value="text">Text</MenuItem>
+                <MenuItem value="number">Number</MenuItem>
+                <MenuItem value="date">Date</MenuItem>
+                <MenuItem value="options">Options</MenuItem>
+                <MenuItem value="list">List</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
 
-          {/* Conditionally Render Options Input for 'Options' Field Type */}
-          {field.fieldType === 'options' && (
-            <Box sx={{ mt: 2 }}>
+          {field.field_type === 'options' && (
+            <Box sx={{ mt: 1 }}>
               {field.options.map((option, optionIndex) => (
                 <Box key={optionIndex} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <TextField
@@ -176,12 +224,7 @@ const EditContractPage = () => {
                   </IconButton>
                 </Box>
               ))}
-              <Button
-                variant="outlined"
-                startIcon={<AddCircleOutline />}
-                onClick={() => handleAddOption(index)}
-                sx={{ mt: 1 }}
-              >
+              <Button variant="outlined" startIcon={<AddCircleOutline />} onClick={() => handleAddOption(index)}>
                 Add Option
               </Button>
             </Box>
@@ -190,16 +233,14 @@ const EditContractPage = () => {
       ))}
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2, mb: 3 }}>
-        <Button variant="outlined" onClick={handleAddField}>
-          Add Field
-        </Button>
+        <Button variant="outlined" onClick={handleAddField}>Add Field</Button>
       </Box>
 
       <TextEditor
         cta="Save Contract"
-        onCtaClick={handleSaveContract} 
+        onCtaClick={handleSaveContract}
         isLoading={saveLoading}
-        initialContent={contractData.body} 
+        initialContent={contractData.body}
       />
     </Container>
   );

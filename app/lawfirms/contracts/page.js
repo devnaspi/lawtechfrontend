@@ -25,7 +25,7 @@ const ContractsPage = () => {
     const fetchContracts = async (page = 1) => {
         setLoading(true);
         try {
-            const response = await axiosInstance.get(`/api/contracts/?page=${page}`);
+            const response = await axiosInstance.get(`/api/contracts/lawfirm?page=${page}`);
             setContracts(response.data.results);
             setPaginationData(response.data);
         } catch (error) {
@@ -53,33 +53,18 @@ const ContractsPage = () => {
                 Contracts
             </Typography>
 
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={() => router.push('/admin/contracts/create')}
-                sx={{ mb: 4 }}
-            >
-                Create New Contract
-            </Button>
-
             <Grid container spacing={4}>
                 {contracts.length > 0 ? (
                     contracts.map((contract) => (
                         <Grid item xs={12} sm={6} md={4} key={contract.id}>
                             <Card
-                                onClick={() => router.push(`/admin/contracts/${contract.code}`)}
+                                onClick={() => router.push(`/lawfirms/contracts/${contract.code}`)}
                                 sx={{ cursor: 'pointer' }}
                             >
                                 <CardContent>
                                     <Typography variant="h6" gutterBottom>
                                         {contract.name}
                                     </Typography>
-
-                                    {contract.lawfirm?.name && (
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                            By <strong>{contract.lawfirm.name}</strong>
-                                        </Typography>
-                                    )}
 
                                     {/* Tags */}
                                     {contract.tags && contract.tags.length > 0 && (

@@ -26,7 +26,7 @@ function Copyright() {
         <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
             {'Copyright © '}
             <Link color="text.secondary" href="/">
-                LAWTECH
+                PRAELEX
             </Link>
             &nbsp;
             {new Date().getFullYear()}

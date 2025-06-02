@@ -7,8 +7,8 @@ import AuthorLayout from './AuthorLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-    title: 'Author Portal - Law Tech',
-    description: 'Manage your articles and author profile on Law Tech',
+    title: 'Author Portal - Praelex Intel',
+    description: 'Manage your articles and author profile on Praelex Intel',
 };
 
 export default function RootLayout({ children }) {

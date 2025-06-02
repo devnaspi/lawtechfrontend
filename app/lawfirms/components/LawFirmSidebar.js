@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Tabs, Tab, Button, Box } from '@mui/material';
+import { Box, ListItemButton, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
 import { useRouter, usePathname } from 'next/navigation';
+import { Dashboard, PersonAdd, Group, Article, Logout, Description } from '@mui/icons-material';
 import axiosInstance from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
@@ -14,21 +15,24 @@ const LawFirmSidebar = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { handleApiError } = useApiErrorHandler();
   const { logout } = useAuth();
-  
-  const [selectedTab, setSelectedTab] = useState(0);
 
-  const routes = ['/lawfirms/dashboard', '/lawfirms/add-author', '/lawfirms/manage-authors', '/lawfirms/articles'];
+  const routes = [
+    { path: '/lawfirms/dashboard', label: 'Dashboard', icon: <Dashboard /> },
+    { path: '/lawfirms/add-author', label: 'Add Author', icon: <PersonAdd /> },
+    { path: '/lawfirms/manage-authors', label: 'Manage Authors', icon: <Group /> },
+    { path: '/lawfirms/articles', label: 'Articles', icon: <Article /> },
+    { path: '/lawfirms/contracts', label: 'Contracts', icon: <Description /> },
+  ];
+
+  const [activeRoute, setActiveRoute] = useState('');
 
   useEffect(() => {
-    const currentRoute = routes.indexOf(pathname);
-    if (currentRoute !== -1) {
-      setSelectedTab(currentRoute);
-    }
+    setActiveRoute(pathname);
   }, [pathname]);
 
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
-    router.push(routes[newValue]);
+  const handleNavigation = (path) => {
+    setActiveRoute(path);
+    router.push(path);
   };
 
   const handleLogout = async () => {
@@ -44,49 +48,58 @@ const LawFirmSidebar = () => {
 
   return (
     <Box 
-    sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      height: '100vh', 
-      backgroundColor: '#f5f5f5',
-      borderColor: 'divider',
-      pt: 3,
-    }}>
-      {/* Sidebar Navigation */}
-      <Tabs
-        orientation="vertical"
-        value={selectedTab}
-        onChange={handleTabChange}
-        sx={{
-          width: '100%',
-          flexGrow: 1,
-          '& .MuiTab-root': {
-            textAlign: 'left',
-            color: 'info.main',
-          },
-          '& .Mui-selected': {
-            color: 'info.main',
-            borderLeft: '4px solid',
-            borderColor: 'info.main',
-          },
-        }}
-      >
-        <Tab label="Dashboard" />
-        <Tab label="Add Author" />
-        <Tab label="Manage Authors" />
-        <Tab label="Articles" />
-      </Tabs>
+      sx={{ 
+        width: 250, 
+        height: '100vh', 
+        backgroundColor: '#1E1E1E', 
+        color: '#fff', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'space-between' 
+      }}
+    >
+      {/* Top section: Logo + Nav */}
+      <Box >
+        {/* Logo / Brand */}
+        <Box sx={{ p: 3, display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.svg" alt="Praelex Logo" style={{ height: 32, marginRight: 8 }} />
+          <Typography variant="h6" fontWeight="bold" color="white">Praelex</Typography>
+        </Box>
 
-      {/* Logout Button */}
-      <Button
-        color="error"
-        variant="text"
-        size="small"
-        sx={{ m: 2 }}
-        onClick={handleLogout}
-      >
-        Logout
-      </Button>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+
+        {/* Navigation */}
+        <Box>
+          {routes.map((route, index) => (
+            <ListItemButton
+              key={index}
+              onClick={() => handleNavigation(route.path)}
+              sx={{
+                color: '#fff',
+                backgroundColor: activeRoute === route.path ? '#2A2A2A' : 'transparent',
+                '&:hover': { backgroundColor: '#333' },
+                px: 3,
+              }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                {route.icon}
+              </ListItemIcon>
+              <ListItemText primary={route.label} />
+            </ListItemButton>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Bottom section: Logout */}
+      <Box>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+        <ListItemButton onClick={handleLogout} sx={{ color: '#fff', px: 3, py: 2 }}>
+          <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText primary="Log out" />
+        </ListItemButton>
+      </Box>
     </Box>
   );
 };

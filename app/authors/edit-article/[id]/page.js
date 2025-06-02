@@ -1,105 +1,97 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Container, Box, TextField, Button, Typography, Autocomplete, Chip } from '@mui/material';
+import {
+  Container, Box, TextField, Typography, Autocomplete, Chip, CircularProgress
+} from '@mui/material';
 import TextEditor from '../../../components/TextEditor';
 import { useRouter, useParams } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
-import CircularProgress from '@mui/material/CircularProgress';
-
 
 const EditArticle = () => {
   const [articleData, setArticleData] = useState({
     title: '',
     content: '',
     tags: [],
-    categories: [],
-    regions: [],
+    countries: [],
+    contributingAuthors: [],
   });
 
-  const [existingTags, setExistingTags] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [regions, setRegions] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [availableCountries, setAvailableCountries] = useState([]);
+  const [availableAuthors, setAvailableAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const { id } = useParams();
   const router = useRouter();
   const { handleApiError } = useApiErrorHandler();
 
-
   useEffect(() => {
-    const fetchArticleDetails = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(`/api/articles/${id}/`);
-        const article = response.data;
+        const articleRes = await axiosInstance.get(`/api/articles/${id}/`);
+        const article = articleRes.data;
+
+        const [tagsRes, countriesRes, authorsRes] = await Promise.all([
+          axiosInstance.get('/api/tags/'),
+          axiosInstance.get('/api/categories/countries/'),
+          axiosInstance.get('/api/authors/colleagues/')
+        ]);
+
+        setAvailableTags(tagsRes.data.results.map(tag => tag.name));
+        setAvailableCountries(countriesRes.data.map(c => c.name));
+        setAvailableAuthors(authorsRes.data); // Full object
 
         setArticleData({
           title: article.title,
           content: article.content,
-          tags: article.tags.map(tag => tag),
-          categories: article.categories.map(category => category),
-          regions: article.regions.map(region => region),
+          tags: article.tags.map(t => t.name || t),
+          countries: article.countries.map(r => r.name || r),
+          contributingAuthors: article.contributing_authors || [], // assuming backend returns this field
         });
 
-        const [tagsRes, categoriesRes, regionsRes] = await Promise.all([
-          axiosInstance.get('/api/tags/'),
-          axiosInstance.get('/api/categories/categories/'),
-          axiosInstance.get('/api/categories/regions/')
-        ]);
-
-        setExistingTags(tagsRes.data.results.map(tag => tag.name));
-        setCategories(categoriesRes.data.results.map(category => category.name));
-        setRegions(regionsRes.data.results.map(region => region.name));
-
       } catch (error) {
-        handleApiError(error)
+        handleApiError(error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchArticleDetails();
+    fetchData();
   }, [id]);
 
-  const handleSaveArticle = async (noteDetails, attachments) => {
+  const handleInputChange = (field, value) => {
+    setArticleData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveArticle = async (noteDetails) => {
     try {
       const updatedArticleData = {
         ...articleData,
         content: noteDetails.html,
+        contributing_authors_ids: articleData.contributingAuthors.map(a => a.id),
       };
 
       await axiosInstance.put(`/api/articles/${id}/`, updatedArticleData);
-
-      console.log('Article updated successfully');
       router.push('/authors/manage-articles');
     } catch (error) {
       console.error('Failed to update article:', error);
     }
   };
 
-  const handleInputChange = (field, value) => {
-    setArticleData({
-      ...articleData,
-      [field]: value,
-    });
-  };
-
   if (loading) {
-      return (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-              <CircularProgress />
-          </Box>
-      );
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5, mb: 4 }}>
-      {/* Title */}
-      <Typography variant="h4" gutterBottom>
-        Edit Article
-      </Typography>
+      <Typography variant="h4" gutterBottom>Edit Article</Typography>
 
-      {/* Article Form */}
       <TextField
         label="Title"
         variant="outlined"
@@ -109,72 +101,58 @@ const EditArticle = () => {
         sx={{ mb: 4 }}
       />
 
-      {/* Tags Input with Autocomplete for Multi-select and Adding New Tags */}
+      {/* Tags */}
       <Autocomplete
         multiple
         freeSolo
-        options={existingTags}
+        options={availableTags}
         value={articleData.tags}
-        onChange={(event, newValue) => handleInputChange('tags', newValue)}
+        onChange={(e, newVal) => handleInputChange('tags', newVal)}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-              key={option}
-            />
+            <Chip key={option} label={option} {...getTagProps({ index })} />
           ))
         }
         renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
-        sx={{ mt: 4, mb: 4 }}
+        sx={{ mb: 4 }}
       />
 
-      {/* Categories Autocomplete */}
+      {/* Countries */}
       <Autocomplete
         multiple
-        options={categories}
-        value={articleData.categories}
-        onChange={(event, newValue) => handleInputChange('categories', newValue)}
+        options={availableCountries}
+        value={articleData.countries}
+        onChange={(e, newVal) => handleInputChange('countries', newVal)}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-              key={option}
-            />
+            <Chip key={option} label={option} {...getTagProps({ index })} />
           ))
         }
-        renderInput={(params) => <TextField {...params} label="Categories" variant="outlined" />}
-        sx={{ mt: 4, mb: 4 }}
+        renderInput={(params) => <TextField {...params} label="Countries" variant="outlined" />}
+        sx={{ mb: 4 }}
       />
 
-      {/* Regions Autocomplete */}
+      {/* Contributing Authors */}
       <Autocomplete
         multiple
-        options={regions}
-        value={articleData.regions}
-        onChange={(event, newValue) => handleInputChange('regions', newValue)}
+        options={availableAuthors}
+        getOptionLabel={(option) => option.user?.username || ''}
+        value={articleData.contributingAuthors}
+        onChange={(e, newVal) => handleInputChange('contributingAuthors', newVal)}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-              key={option}
-            />
+            <Chip key={option.id} label={option.user?.username || ''} {...getTagProps({ index })} />
           ))
         }
-        renderInput={(params) => <TextField {...params} label="Regions" variant="outlined" />}
-        sx={{ mt: 4, mb: 4 }}
+        renderInput={(params) => <TextField {...params} label="Contributing Authors" variant="outlined" />}
+        sx={{ mb: 4 }}
       />
 
-      {/* Integrating TextEditor Component */}
+      {/* Text Editor */}
       <TextEditor
         initialContent={articleData.content}
-        cta="Update Article" 
-        onCtaClick={handleSaveArticle} 
+        cta="Update Article"
+        onCtaClick={handleSaveArticle}
       />
     </Container>
   );

@@ -9,6 +9,7 @@ import axiosInstance from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
 import useApiErrorHandler from '@/utils/useApiErrorHandler';
 import { Building2 } from 'lucide-react';
+import Link from 'next/link';
 
 const ArticleDetails = ({ params }) => {
     const router = useRouter();
@@ -26,16 +27,18 @@ const ArticleDetails = ({ params }) => {
         fetchSimilarArticles();
     }, [code]);
 
+    useEffect(() => {
+        if (article?.id) {
+            addToHistory(article.id);
+        }
+    }, [article]);
+
     const fetchArticle = async () => {
         setLoading(true);
         try {
             const response = await axiosInstance.get(`/api/articles/${code}`);
             setArticle(response.data);
             setIsBookmarked(response.data.is_bookmarked);
-
-            if (article) {
-                addToHistory();
-            }
         } catch (error) {
             console.error('Failed to fetch article:', error);
         } finally {
@@ -52,9 +55,10 @@ const ArticleDetails = ({ params }) => {
         }
     };
 
-    const addToHistory = async () => {
+    const addToHistory = async (articleId) => {
         try {
-            await axiosInstance.post('/api/history/', { article_id: article.id });
+            console.log('')
+            await axiosInstance.post('/api/history/', { article_id: articleId });
         } catch (error) {
             console.log(error)
             handleApiError(error)
@@ -211,20 +215,19 @@ const ArticleDetails = ({ params }) => {
                         }}
                     >
                         To learn more, contact{' '}
-                        <Typography
-                            component="a"
-                            href={`${article.author.lawfirm.website || ''}`}
-                            target="_blank"
-                            sx={{
+                        <Link href={`/readers/explore/lawfirms/${article.author.lawfirm.id}`} passHref>
+                            <Typography
+                                component="span"
+                                sx={{
                                 textDecoration: 'underline',
                                 color: 'primary.main',
-                                '&:hover': {
-                                    color: 'primary.dark',
-                                }
-                            }}
-                        >
-                            {article.author.lawfirm.name}
-                        </Typography>
+                                cursor: 'pointer',
+                                '&:hover': { color: 'primary.dark' },
+                                }}
+                            >
+                                {article.author.lawfirm.name}
+                            </Typography>
+                        </Link>
                         {' '}here.
                     </Typography>
                 </Paper>
@@ -242,7 +245,24 @@ const ArticleDetails = ({ params }) => {
                     Contributing Author(s)
                 </Typography>
                 <Stack spacing={2}>
-                    {Array.isArray(article.authors) ? article.authors.map((author, index) => (
+                    <Box 
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2
+                        }}
+                    >
+                        <Avatar
+                            src={article.author.avatar}
+                            alt={article.author.user.username}
+                            sx={{ width: 40, height: 40 }}
+                        />
+                        <Typography variant="body1">
+                            {article.author.user.username}
+                        </Typography>
+                    </Box>
+                    
+                    {Array.isArray(article.contributing_authors) && article.contributing_authors.map((author, index) => (
                         <Box 
                             key={index}
                             sx={{
@@ -260,24 +280,7 @@ const ArticleDetails = ({ params }) => {
                                 {author.user.username}
                             </Typography>
                         </Box>
-                    )) : (
-                        <Box 
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2
-                            }}
-                        >
-                            <Avatar
-                                src={article.author.avatar}
-                                alt={article.author.user.username}
-                                sx={{ width: 40, height: 40 }}
-                            />
-                            <Typography variant="body1">
-                                {article.author.user.username}
-                            </Typography>
-                        </Box>
-                    )}
+                    ))}
                 </Stack>
             </Paper>
 

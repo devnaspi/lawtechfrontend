@@ -118,11 +118,8 @@ const ContractDetailPage = () => {
       </Box>
 
       <Stack direction="row" spacing={2}>
-        <Button variant="contained" color="primary" onClick={() => router.push('/admin/contracts')}>
+        <Button variant="contained" color="primary" onClick={() => router.push('/lawfirms/contracts')}>
           Back to Contracts
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={() => router.push(`/admin/contracts/${id}/edit`)}>
-          Edit Contract
         </Button>
       </Stack>
     </Container>

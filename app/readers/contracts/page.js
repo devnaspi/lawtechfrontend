@@ -130,6 +130,13 @@ const ContractsList = () => {
                                             {contract.name}
                                         </Typography>
 
+                                        {contract.lawfirm?.name && (
+                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                                Drafted by <strong>{contract.lawfirm.name}</strong>
+                                            </Typography>
+                                        )}
+
+
                                         {/* Tags List */}
                                         <Box
                                             sx={{
