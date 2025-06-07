@@ -52,11 +52,28 @@ function NavBar() {
                             href="/readers/"
                             sx={{
                                 color: theme.palette.primary.main,
-                                display: { xs: 'none', sm: 'flex' }
+                                display: 'flex',
+                                alignItems: 'center'
                             }}
                         >
-                            <img src="/logo.svg" alt="Praelex Logo" style={{ height: 32, marginRight: 8 }} />
-                            <Typography variant="h6" fontWeight="bold">PRAELEX</Typography>
+
+                            <img
+                                src="/logo.svg"
+                                alt="Praelex Logo"
+                                style={{
+                                    height: 28,
+                                    marginRight: 8,
+                                    maxWidth: '100%',
+                                }}
+                            />
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{ display: { xs: 'none', sm: 'block' } }}
+                                >
+                                PRAELEX
+                            </Typography>
+
                         </Button>
 
                         <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>

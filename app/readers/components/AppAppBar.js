@@ -7,6 +7,12 @@ import Container from '@mui/material/Container';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import AppBar from '@mui/material/AppBar';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -27,6 +33,49 @@ export default function AppAppBar() {
     const router = useRouter();
     const { auth } = useAuth();
     const theme = useTheme();
+    const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+    const toggleDrawer = (open) => (event) => {
+        if (
+          event.type === 'keydown' &&
+          (event.key === 'Tab' || event.key === 'Shift')
+        ) {
+          return;
+        }
+        setDrawerOpen(open);
+    };
+
+    const drawerItems = (
+        <Box
+          sx={{ width: 250 }}
+          role="presentation"
+          onClick={toggleDrawer(false)}
+          onKeyDown={toggleDrawer(false)}
+        >
+          <List>
+            <ListItem button component="a" href="/readers/explore">
+              <ListItemText primary="Explore" />
+            </ListItem>
+            <ListItem button component="a" href="/readers/contracts">
+              <ListItemText primary="Contracts" />
+            </ListItem>
+            {!auth.isAuthenticated ? (
+              <>
+                <ListItem button onClick={() => router.push('/readers/login')}>
+                  <ListItemText primary="Sign In" />
+                </ListItem>
+                <ListItem button onClick={() => router.push('/readers/sign-up')}>
+                  <ListItemText primary="Sign Up" />
+                </ListItem>
+              </>
+            ) : (
+              <ListItem>
+                <ListItemText primary={`Hello, ${auth.user?.username}`} />
+              </ListItem>
+            )}
+          </List>
+        </Box>
+    );      
 
     return (
         <AppBar
@@ -98,7 +147,19 @@ export default function AppAppBar() {
                             </>
                         )}
                     </Box>
-                    <Box sx={{ display: { sm: 'flex', md: 'none' } }}></Box>
+                    <Box sx={{ display: { sm: 'flex', md: 'none' } }}>
+                        <IconButton
+                            edge="start"
+                            color="inherit"
+                            aria-label="menu"
+                            onClick={toggleDrawer(true)}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+                            {drawerItems}
+                        </Drawer>
+                    </Box>
                 </StyledToolbar>
             </Container>
         </AppBar>
