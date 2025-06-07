@@ -123,16 +123,37 @@ const LawFirmContentPage = () => {
       )}
 
       {/* Tabs */}
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        centered
-        sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}
-        TabIndicatorProps={{ sx: { backgroundColor: 'primary.main', height: 3, ml: 6 } }}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          variant="fullWidth"
+          textColor="inherit"
+          indicatorColor="primary"
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            minHeight: 'auto',
+          }}
+          TabIndicatorProps={{
+            sx: {
+              height: 3,
+            },
+          }}
         >
-        <Tab label="Articles" value="articles" />
-        <Tab label="Contracts" value="contracts" />
-      </Tabs>
+          <Tab
+            value="articles"
+            label="Articles"
+            sx={{ fontWeight: tab === 'articles' ? 700 : 400, minHeight: 'auto' }}
+          />
+          <Tab
+            value="contracts"
+            label="Contracts"
+            sx={{ fontWeight: tab === 'contracts' ? 700 : 400, minHeight: 'auto' }}
+          />
+        </Tabs>
+      </Box>
+
 
 
 
