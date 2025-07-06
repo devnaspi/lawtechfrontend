@@ -21,6 +21,9 @@ import {
 import { Globe } from 'lucide-react';
 import StyledTypography from '@/app/readers/components/StyledTypography';
 import Author from '@/app/readers/components/Author';
+import { useAuth } from '@/context/AuthContext';
+
+
 
 const LawFirmContentPage = () => {
   const { lawfirmId } = useParams();
@@ -31,6 +34,7 @@ const LawFirmContentPage = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('articles');
+  const { auth, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -123,16 +127,37 @@ const LawFirmContentPage = () => {
       )}
 
       {/* Tabs */}
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        centered
-        sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}
-        TabIndicatorProps={{ sx: { backgroundColor: 'primary.main', height: 3, ml: 6 } }}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          variant="fullWidth"
+          textColor="inherit"
+          indicatorColor="primary"
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            minHeight: 'auto',
+          }}
+          TabIndicatorProps={{
+            sx: {
+              height: 3,
+            },
+          }}
         >
-        <Tab label="Articles" value="articles" />
-        <Tab label="Contracts" value="contracts" />
-      </Tabs>
+          <Tab
+            value="articles"
+            label="Articles"
+            sx={{ fontWeight: tab === 'articles' ? 700 : 400, minHeight: 'auto' }}
+          />
+          <Tab
+            value="contracts"
+            label="Contracts"
+            sx={{ fontWeight: tab === 'contracts' ? 700 : 400, minHeight: 'auto' }}
+          />
+        </Tabs>
+      </Box>
+
 
 
 
@@ -179,30 +204,37 @@ const LawFirmContentPage = () => {
       )}
 
       {tab === 'contracts' && (
-        contracts.length > 0 ? (
-          <Grid container spacing={4}>
-            {contracts.map(contract => (
-              <Grid item xs={12} sm={6} md={4} key={contract.id}>
-                <Card
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => router.push(`/readers/contracts/${contract.code}`)}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>{contract.name}</Typography>
-                    <Box mt={1} sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                      {contract.tags.map((tag, index) => (
-                        <Chip key={index} label={tag} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+        auth.isAuthenticated ? (
+          contracts.length > 0 ? (
+            <Grid container spacing={4}>
+              {contracts.map(contract => (
+                <Grid item xs={12} sm={6} md={4} key={contract.id}>
+                  <Card
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => router.push(`/readers/contracts/${contract.code}`)}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>{contract.name}</Typography>
+                      <Box mt={1} sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                        {contract.tags.map((tag, index) => (
+                          <Chip key={index} label={tag} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Typography align="center" color="text.secondary">No contracts found.</Typography>
+          )
         ) : (
-          <Typography align="center" color="text.secondary">No contracts found.</Typography>
+          <Typography align="center" color="text.secondary">
+            Please sign in to view contracts.
+          </Typography>
         )
       )}
+
     </Container>
   );
 };

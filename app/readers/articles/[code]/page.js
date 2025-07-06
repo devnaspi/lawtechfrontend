@@ -215,7 +215,7 @@ const ArticleDetails = ({ params }) => {
                         }}
                     >
                         To learn more, contact{' '}
-                        <Link href={`/readers/explore/lawfirms/${article.author.lawfirm.id}`} passHref>
+                        <Link href={`/readers/explore/lawfirms/${article.author.lawfirm?.code || article.author.lawfirm?.id}`} passHref>
                             <Typography
                                 component="span"
                                 sx={{
