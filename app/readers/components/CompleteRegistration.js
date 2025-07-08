@@ -12,16 +12,20 @@ import {
     MenuItem,
     InputAdornment,
     IconButton as MuiIconButton,
+    Select,
+    OutlinedInput,
+    Checkbox,
+    ListItemText,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import axiosInstance from '@/lib/axios';
-
 import { useRouter } from 'next/navigation';
 
-
 export default function CompleteRegistration({ open, handleClose, email }) {
-    const [categories, setCategories] = useState([]);
+    const [tags, setTags] = useState([]);
     const [selectedRegion, setSelectedRegion] = useState('Africa');
     const [regions, setRegions] = useState([]);
     const [countries, setCountries] = useState([]);
@@ -30,56 +34,82 @@ export default function CompleteRegistration({ open, handleClose, email }) {
     const { handleApiError } = useApiErrorHandler();
     const router = useRouter();
 
-
     const [formData, setFormData] = useState({
         username: '',
         password: '',
         country: '',
-        areaOfLaw: ''
+        preferred_tags: [],
     });
 
-    const isFormValid = Object.values(formData).every((value) => value.trim() !== '');
+    const isFormValid =
+        formData.username.trim() !== '' &&
+        formData.password.trim() !== '' &&
+        formData.country.trim() !== '' &&
+        formData.preferred_tags.length > 0;
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            const response = await axiosInstance.get('/api/categories/categories');
-            setCategories(response.data.results);
+        const fetchTags = async () => {
+            try {
+                const response = await axiosInstance.get('/api/tags/');
+                setTags(response.data.results);
+            } catch (error) {
+                handleApiError(error);
+            }
         };
 
         const fetchRegions = async () => {
-            const response = await axiosInstance.get('/api/categories/regions');
-            setRegions(response.data.results);
+            try {
+                const response = await axiosInstance.get('/api/categories/regions');
+                setRegions(response.data.results);
+            } catch (error) {
+                handleApiError(error);
+            }
         };
 
-        fetchCategories();
+        fetchTags();
         fetchRegions();
     }, []);
 
     useEffect(() => {
-        fetchCountries()
-    }, [selectedRegion])
+        fetchCountries();
+    }, [selectedRegion]);
 
     const fetchCountries = async () => {
-        const response = await axiosInstance.get(`/api/categories/regions/${selectedRegion}/countries`);
-        setCountries(response.data);
-    }
+        try {
+            const response = await axiosInstance.get(`/api/categories/regions/${selectedRegion}/countries`);
+            setCountries(response.data);
+        } catch (error) {
+            handleApiError(error);
+        }
+    };
 
     const handleRegionInputChange = (e) => {
-        setSelectedRegion(e.target.value)
+        setSelectedRegion(e.target.value);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleTagsChange = (event) => {
+        const {
+            target: { value },
+        } = event;
+        setFormData((prev) => ({
+            ...prev,
+            preferred_tags: typeof value === 'string' ? value.split(',') : value,
+        }));
     };
 
     const handleSubmit = async () => {
         try {
-            const response = await axiosInstance.post('/api/users/register/', {
+            const payload = {
                 ...formData,
                 email,
                 role: 'client',
-            });
+            };
+            const response = await axiosInstance.post('/api/users/register/', payload);
             enqueueSnackbar(response.data.message, { variant: 'success' });
             handleClose();
             router.push('/readers/login');
@@ -146,19 +176,31 @@ export default function CompleteRegistration({ open, handleClose, email }) {
                             <MenuItem key={country.id} value={country.name}>{country.name}</MenuItem>
                         ))}
                     </TextField>
-                    <TextField
-                        select
-                        label="Area of Law"
-                        name="areaOfLaw"
-                        value={formData.areaOfLaw}
-                        onChange={handleInputChange}
-                        required
-                        fullWidth
-                    >
-                        {categories.map((category) => (
-                            <MenuItem key={category.id} value={category.name}>{category.name}</MenuItem>
-                        ))}
-                    </TextField>
+
+                    <FormControl fullWidth>
+                        <InputLabel id="preferred-tags-label">Area of Law</InputLabel>
+                        <Select
+                            multiple
+                            displayEmpty
+                            value={formData.preferred_tags}
+                            onChange={handleTagsChange}
+                            renderValue={(selected) => {
+                                if (selected.length === 0) {
+                                    return <span>Area of Law You're interested in</span>;
+                                }
+                                return selected.join(', ');
+                            }}
+                            fullWidth
+                        >
+                            {tags.map((tag, index) => (
+                                <MenuItem key={index} value={tag.name}>
+                                    <Checkbox checked={formData.preferred_tags.indexOf(tag.name) > -1} />
+                                    <ListItemText primary={tag.name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    
                     <Button variant="contained" onClick={handleSubmit} disabled={!isFormValid}>Register</Button>
                 </Box>
             </DialogContent>
