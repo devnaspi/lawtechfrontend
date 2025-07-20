@@ -253,7 +253,7 @@ const ArticleDetails = ({ params }) => {
                         }}
                     >
                         <Avatar
-                            src={article.author.avatar}
+                            src={article.author.user.profile_picture}
                             alt={article.author.user.username}
                             sx={{ width: 40, height: 40 }}
                         />
@@ -272,7 +272,7 @@ const ArticleDetails = ({ params }) => {
                             }}
                         >
                             <Avatar
-                                src={author.avatar}
+                                src={author.user.profile_picture}
                                 alt={author.user.username}
                                 sx={{ width: 40, height: 40 }}
                             />
