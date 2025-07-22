@@ -10,76 +10,71 @@ import { useSnackbar } from 'notistack';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@emotion/react';
 
-
 const ManageProfile = () => {
     const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [specialties, setSpecialties] = useState([]);
     const [profilePicture, setProfilePicture] = useState(null);
     const [profilePicturePreview, setProfilePicturePreview] = useState('/static/images/avatar/1.jpg');
 
-
     const [existingTags, setExistingTags] = useState([]);
     const { handleApiError } = useApiErrorHandler();
     const { enqueueSnackbar } = useSnackbar();
-    const { auth, setAuth, loading, logout } = useAuth();
-    const theme = useTheme()
-
+    const { auth, setAuth, loading } = useAuth();
+    const theme = useTheme();
 
     useEffect(() => {
-        console.log(auth?.user)
-        if (!loading && name === '') {
-            setName(auth.user?.user?.username || '');
-        }
-        if (!loading && email === '') {
-            setEmail(auth.user?.user?.email || '');
-        }
-        if (!loading && profilePicturePreview === '/static/images/avatar/1.jpg') {
-            setProfilePicturePreview(auth.user?.user?.profile_picture || '/static/images/avatar/1.jpg');
-        }
         if (!loading) {
-            setSpecialties(auth.user?.tags)
+            const user = auth.user?.user || auth.user;
+            setName(user?.username || '');
+            setEmail(user?.email || '');
+            setFirstName(user?.first_name || '');
+            setLastName(user?.last_name || '');
+            setProfilePicturePreview(user?.profile_picture || '/static/images/avatar/1.jpg');
+            setSpecialties(auth.user?.tags || []);
         }
 
         const fetchProfileDetails = async () => {
             try {
                 const tagsResponse = await axiosInstance.get('/api/tags/');
                 setExistingTags(tagsResponse.data.results.map(tag => tag.name));
-            }
-            catch (error) {
+            } catch (error) {
                 handleApiError(error);
             }
         };
 
         fetchProfileDetails();
-    }, []);
+    }, [loading]);
 
     const handleProfilePictureChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setProfilePicturePreview(imageUrl);
+            setProfilePicturePreview(URL.createObjectURL(file));
             setProfilePicture(file);
         }
     };
 
     const handleSaveProfile = async () => {
         try {
-            console.log("specialites is ", specialties)
             const formData = new FormData();
             formData.append('username', name);
             formData.append('email', email);
-            formData.append('tags', specialties)
+            formData.append('first_name', firstName);
+            formData.append('last_name', lastName);
+            formData.append('tags', specialties);
+
             if (profilePicture instanceof File) {
                 formData.append('profile_picture', profilePicture);
             }
-            console.log('formdata is ', formData)
+
             await axiosInstance.put('/api/authors/profile/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            
+
             const response = await axiosInstance.get('/api/authors/profile/');
             const updatedUser = response.data;
 
@@ -87,6 +82,7 @@ const ManageProfile = () => {
                 ...prevAuth,
                 user: updatedUser,
             }));
+
             enqueueSnackbar('Profile updated successfully', { variant: 'success' });
 
         } catch (error) {
@@ -104,7 +100,6 @@ const ManageProfile = () => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {/* Title */}
             <Typography variant="h4" gutterBottom>
                 Manage Profile
             </Typography>
@@ -129,27 +124,31 @@ const ManageProfile = () => {
                 </Typography>
             </Box>
 
-            {/* Profile Form */}
             <TextField
-                label="Name"
+                label="Username"
                 variant="outlined"
                 fullWidth
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                sx={{ mb: 3, '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                  '& input': {
-                    color: theme.palette.text.primary,
-                }, }}
+                sx={textFieldStyle(theme)}
+            />
+
+            <TextField
+                label="First Name"
+                variant="outlined"
+                fullWidth
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                sx={textFieldStyle(theme)}
+            />
+
+            <TextField
+                label="Last Name"
+                variant="outlined"
+                fullWidth
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                sx={textFieldStyle(theme)}
             />
 
             <TextField
@@ -158,23 +157,9 @@ const ManageProfile = () => {
                 fullWidth
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                sx={{ mb: 3 , '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                  '& input': {
-                    color: theme.palette.text.primary,
-                }, }}
+                sx={textFieldStyle(theme)}
             />
 
-            {/* Tags Input with Autocomplete for Multi-select */}
             <Autocomplete
                 multiple
                 freeSolo
@@ -192,28 +177,32 @@ const ManageProfile = () => {
                     ))
                 }
                 renderInput={(params) => <TextField {...params} label="Specialties" variant="outlined" />}
-                sx={{  mt: 4, mb: 4 , '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                  '& input': {
-                    color: theme.palette.text.primary,
-                }, }}
+                sx={textFieldStyle(theme)}
             />
 
-            {/* Save Button */}
             <Button variant="contained" color="primary" onClick={handleSaveProfile}>
                 Save Profile
             </Button>
         </Container>
     );
 };
+
+const textFieldStyle = (theme) => ({
+    mb: 3,
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: theme.palette.primary.main,
+        },
+        '&:hover fieldset': {
+            borderColor: theme.palette.primary.main,
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: theme.palette.primary.main,
+        },
+    },
+    '& input': {
+        color: theme.palette.text.primary,
+    },
+});
 
 export default ManageProfile;
