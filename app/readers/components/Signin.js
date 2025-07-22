@@ -63,6 +63,7 @@ export default function Signin({ open, handleClose }) {
             handleClose();
             router.push(redirectTo);
         } catch (error) {
+            console.log('an error occured', error)
             if (error.response && error.response.data) {
                 const errorData = error.response.data;
 

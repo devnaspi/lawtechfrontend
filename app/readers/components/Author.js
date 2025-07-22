@@ -78,14 +78,21 @@ function Author({ authors, created_at, company }) {
                             <Avatar
                                 key={index}
                                 alt={author.user.username}
-                                src={author.avatar}
+                                src={author.user.profile_picture}
                                 sx={{ width: 24, height: 24 }}
                             />
                         ))}
                     </AvatarGroup>
                     <Typography variant="caption">
-                        {authors.map((author) => author.user.username).join(', ')}
+                        {authors
+                            .map((author) => {
+                            const { first_name, last_name, username } = author.user;
+                            const fullName = [first_name, last_name].filter(Boolean).join(' ');
+                            return fullName || username;
+                            })
+                            .join(', ')}
                     </Typography>
+
                 </Box>
                 <Typography variant="caption">{formatDate(created_at)}</Typography>
             </Box>
