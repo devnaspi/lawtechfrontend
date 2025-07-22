@@ -253,13 +253,16 @@ const ArticleDetails = ({ params }) => {
                         }}
                     >
                         <Avatar
-                            src={article.author.avatar}
+                            src={article.author.user.profile_picture}
                             alt={article.author.user.username}
                             sx={{ width: 40, height: 40 }}
                         />
                         <Typography variant="body1">
-                            {article.author.user.username}
+                            {article.author.user.first_name || article.author.user.last_name
+                                ? `${article.author.user.first_name || ''} ${article.author.user.last_name || ''}`.trim()
+                                : article.author.user.username}
                         </Typography>
+
                     </Box>
                     
                     {Array.isArray(article.contributing_authors) && article.contributing_authors.map((author, index) => (
@@ -272,13 +275,16 @@ const ArticleDetails = ({ params }) => {
                             }}
                         >
                             <Avatar
-                                src={author.avatar}
+                                src={author.user.profile_picture}
                                 alt={author.user.username}
                                 sx={{ width: 40, height: 40 }}
                             />
                             <Typography variant="body1">
-                                {author.user.username}
+                                {author.user.first_name || author.user.last_name
+                                    ? `${author.user.first_name || ''} ${author.user.last_name || ''}`.trim()
+                                    : author.user.username}
                             </Typography>
+
                         </Box>
                     ))}
                 </Stack>

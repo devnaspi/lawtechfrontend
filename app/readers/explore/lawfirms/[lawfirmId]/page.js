@@ -44,10 +44,10 @@ const LawFirmContentPage = () => {
       
           // Load default tab
           if (tab === 'articles') {
-            const articlesRes = await axiosInstance.get(`/api/articles/?author__lawfirm_id=${lawfirmId}`);
+            const articlesRes = await axiosInstance.get(`/api/articles/?lawfirm=${lawfirmId}`);
             setArticles(articlesRes.data.results || []);
           } else {
-            const contractsRes = await axiosInstance.get(`/api/contracts/?lawfirm_id=${lawfirmId}`);
+            const contractsRes = await axiosInstance.get(`/api/contracts/?lawfirm=${lawfirmId}`);
             setContracts(contractsRes.data.results || []);
           }
         } catch (err) {
@@ -66,10 +66,10 @@ const LawFirmContentPage = () => {
   
     try {
       if (newValue === 'articles') {
-        const articlesRes = await axiosInstance.get(`/api/articles/?author__lawfirm_id=${lawfirmId}`);
+        const articlesRes = await axiosInstance.get(`/api/articles/?lawfirm=${lawfirmId}`);
         setArticles(articlesRes.data.results || []);
       } else {
-        const contractsRes = await axiosInstance.get(`/api/contracts/?lawfirm_id=${lawfirmId}`);
+        const contractsRes = await axiosInstance.get(`/api/contracts/?lawfirm=${lawfirmId}`);
         setContracts(contractsRes.data.results || []);
       }
     } catch (err) {

@@ -156,25 +156,37 @@ const ContractDetail = ({ params }) => {
                                 fullWidth
                                 margin="normal"
                                 required
-                                value={formData[field.field_name] || ''}
+                                value={
+                                  field.field_type === 'date'
+                                    ? formData[field.field_name] || '' // make sure it’s a valid date string or empty
+                                    : formData[field.field_name] || ''
+                                }
                                 onChange={handleInputChange}
+                                multiline={field.field_type === 'text'}
+                                minRows={field.field_type === 'text' ? 3 : undefined}
+                                InputLabelProps={
+                                  field.field_type === 'date'
+                                    ? { shrink: true }
+                                    : {}
+                                }
                                 sx={{
-                                '& .MuiOutlinedInput-root': {
+                                  '& .MuiOutlinedInput-root': {
                                     '& fieldset': {
-                                    borderColor: theme.palette.primary.main,
+                                      borderColor: theme.palette.primary.main,
                                     },
                                     '&:hover fieldset': {
-                                    borderColor: theme.palette.primary.main,
+                                      borderColor: theme.palette.primary.main,
                                     },
                                     '&.Mui-focused fieldset': {
-                                    borderColor: theme.palette.primary.main,
+                                      borderColor: theme.palette.primary.main,
                                     },
-                                },
-                                '& input': {
+                                  },
+                                  '& input, & textarea': {
                                     color: theme.palette.text.primary,
-                                },
+                                  },
                                 }}
-                            />
+                              />
+
                             )}
                         </Box>
                         ))}

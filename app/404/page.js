@@ -1,74 +1,39 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Container, Dialog, DialogContent } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { Box, Typography, Button, Stack, useTheme } from '@mui/material';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import { useRouter } from 'next/navigation';
 
-const Custom404 = () => {
-const router = useRouter();
-const [openDialog, setOpenDialog] = useState(true);
+export default function NotFound() {
+  const router = useRouter();
+  const theme = useTheme();
 
-const handleCloseDialog = () => {
-setOpenDialog(false);
-router.push('/readers/');
-};
-
-useEffect(() => {
-setOpenDialog(true);
-}, []);
-
-return (
-<Container
-    maxWidth="md"
-    sx={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    textAlign: 'center',
-    }}
->
-    <Dialog
-    open={openDialog}
-    onClose={handleCloseDialog}
-    maxWidth="sm"
-    fullWidth
-    PaperProps={{
-        sx: {
-        padding: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        },
-    }}
-    >
-    <DialogContent>
-        <Box
+  return (
+    <Box
         sx={{
+            minHeight: '85vh',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
+            justifyContent: 'center',
+            alignItems: 'start',
+            backgroundImage: 'url("/law404.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             padding: 4,
         }}
-        >
-        <ErrorOutlineIcon sx={{ fontSize: 100, color: 'red', mb: 3 }} />
-        <Typography variant="h4" gutterBottom>
-            404 - Page Not Found
+    >
+      <Stack spacing={2} alignItems="center" textAlign="center" >
+        <SentimentVeryDissatisfiedIcon sx={{ fontSize: 80, color: '#ee8822' }} />
+        <Typography variant="h4" color="text.primary">
+          404 - Page Not Found
         </Typography>
-        <Typography variant="body1" sx={{ mb: 4 }}>
-            Oops! The page you are looking for does not exist. It might have been moved or deleted.
+        <Typography variant="h6" sx={{fontWeight: 'bold'}} color="text.primary" maxWidth={500}>
+          The page you&apos;re looking for doesn&apos;t exist or may have been moved. Let&apos;s get you back on track.
         </Typography>
-        <Button variant="contained" color="primary" onClick={handleCloseDialog}>
-            Back to Home
+        <Button sx={{'backgroundColor': '#ee8822'}} variant="contained" color="primary" onClick={() => router.push('/')}>
+          Go to Homepage
         </Button>
-        </Box>
-    </DialogContent>
-    </Dialog>
-</Container>
-);
-};
-
-export default Custom404;
+      </Stack>
+    </Box>
+  );
+}

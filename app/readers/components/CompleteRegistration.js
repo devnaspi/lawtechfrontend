@@ -186,7 +186,7 @@ export default function CompleteRegistration({ open, handleClose, email }) {
                             onChange={handleTagsChange}
                             renderValue={(selected) => {
                                 if (selected.length === 0) {
-                                    return <span>Area of Law You're interested in</span>;
+                                    return <span>Area of Law Your&apos;e interested in</span>;
                                 }
                                 return selected.join(', ');
                             }}
