@@ -133,6 +133,24 @@ export default function CompleteRegistration({ open, handleClose, email }) {
                         fullWidth
                     />
                     <TextField
+                        label="First Name"
+                        name="first_name"
+                        value={formData.first_name}
+                        onChange={handleInputChange}
+                        type='text'
+                        required
+                        fullWidth
+                    />
+                    <TextField
+                        label="Last Name"
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={handleInputChange}
+                        type='text'
+                        required
+                        fullWidth
+                    />
+                    <TextField
                         label="Password"
                         name="password"
                         value={formData.password}
